@@ -7,14 +7,15 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, on
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-// FIREBASE CONFIG - Replace with your Firebase project config
+// FIREBASE CONFIG - Your Firebase project config
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyAgEdyqSoIEJxhV1ywCsl50OvVl7XvURGI",
+  authDomain: "labubu-app-f42ca.firebaseapp.com",
+  projectId: "labubu-app-f42ca",
+  storageBucket: "labubu-app-f42ca.firebasestorage.app",
+  messagingSenderId: "9943020327",
+  appId: "1:9943020327:web:753af08ec118f512d3ef02",
+  measurementId: "G-6PVLB0C865"
 };
 
 // Initialize Firebase
