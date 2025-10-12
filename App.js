@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image, FlatList, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image, FlatList, Alert, Modal, Pressable } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -475,6 +475,165 @@ function CollectionScreen({ user, onBrowse }) {
   );
 }
 
+// Photo Studio Screen
+function PhotoStudioScreen({ user, onBack }) {
+  const [userCollection, setUserCollection] = useState({ owned: [], wishlist: [], photos: {} });
+  const [loading, setLoading] = useState(true);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+
+  useEffect(() => {
+    loadUserCollection();
+  }, []);
+
+  const loadUserCollection = async () => {
+    try {
+      const docRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        setUserCollection(docSnap.data());
+      }
+    } catch (error) {
+      console.error('Error loading collection:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeletePhoto = async (labubuId) => {
+    Alert.alert(
+      'Delete Photo',
+      'Are you sure you want to delete this photo?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            const newPhotos = { ...userCollection.photos };
+            delete newPhotos[labubuId];
+            const newCollection = { ...userCollection, photos: newPhotos };
+            setUserCollection(newCollection);
+
+            try {
+              await setDoc(doc(db, 'users', user.uid), newCollection);
+              setSelectedPhoto(null);
+              Alert.alert('Success', 'Photo deleted!');
+            } catch (error) {
+              console.error('Error deleting photo:', error);
+              Alert.alert('Error', 'Failed to delete photo');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Get all photos with their Labubu info
+  const photoGallery = Object.entries(userCollection.photos || {}).map(([labubuId, photoUrl]) => {
+    const labubu = LABUBU_DATA.find(l => l.id === labubuId);
+    return {
+      labubuId,
+      photoUrl,
+      labubuName: labubu?.name || 'Unknown Labubu',
+      series: labubu?.series || '',
+    };
+  });
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#6366f1" />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={onBack}>
+          <Text style={styles.backButton}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Photo Studio</Text>
+        <View style={{ width: 60 }} />
+      </View>
+
+      {photoGallery.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>No photos yet!</Text>
+          <Text style={styles.emptySubtext}>Add photos to your owned Labubus in the Collection</Text>
+        </View>
+      ) : (
+        <>
+          <Text style={styles.galleryCount}>{photoGallery.length} Photo{photoGallery.length !== 1 ? 's' : ''}</Text>
+          <FlatList
+            data={photoGallery}
+            keyExtractor={item => item.labubuId}
+            numColumns={2}
+            contentContainerStyle={styles.gridContent}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.photoCard}
+                onPress={() => setSelectedPhoto(item)}
+              >
+                <Image source={{ uri: item.photoUrl }} style={styles.photoImage} />
+                <View style={styles.photoInfo}>
+                  <Text style={styles.photoName}>{item.labubuName}</Text>
+                  <Text style={styles.photoSeries}>{item.series}</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+        </>
+      )}
+
+      {/* Full Screen Photo Modal */}
+      {selectedPhoto && (
+        <Modal
+          visible={true}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setSelectedPhoto(null)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setSelectedPhoto(null)}
+          >
+            <View style={styles.modalContent}>
+              <Image
+                source={{ uri: selectedPhoto.photoUrl }}
+                style={styles.fullScreenImage}
+                resizeMode="contain"
+              />
+              <View style={styles.modalInfo}>
+                <Text style={styles.modalTitle}>{selectedPhoto.labubuName}</Text>
+                <Text style={styles.modalSeries}>{selectedPhoto.series}</Text>
+              </View>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.deleteButton]}
+                  onPress={() => handleDeletePhoto(selectedPhoto.labubuId)}
+                >
+                  <Text style={styles.modalButtonText}>Delete Photo</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.closeButton]}
+                  onPress={() => setSelectedPhoto(null)}
+                >
+                  <Text style={styles.modalButtonText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Pressable>
+        </Modal>
+      )}
+    </View>
+  );
+}
+
 // Main Hub Screen
 function MainHub({ user, onLogout }) {
   const [currentScreen, setCurrentScreen] = useState('hub');
@@ -493,6 +652,15 @@ function MainHub({ user, onLogout }) {
       <BrowseScreen
         user={user}
         onBack={() => setCurrentScreen('collection')}
+      />
+    );
+  }
+
+  if (currentScreen === 'photoStudio') {
+    return (
+      <PhotoStudioScreen
+        user={user}
+        onBack={() => setCurrentScreen('hub')}
       />
     );
   }
@@ -522,10 +690,13 @@ function MainHub({ user, onLogout }) {
           <Text style={styles.cardSubtitle}>Coming later</Text>
         </View>
 
-        <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => setCurrentScreen('photoStudio')}
+        >
           <Text style={styles.cardTitle}>📸 Photo Studio</Text>
-          <Text style={styles.cardSubtitle}>Coming in Phase 4</Text>
-        </View>
+          <Text style={styles.cardSubtitle}>View all your Labubu photos</Text>
+        </TouchableOpacity>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>👥 Community Hub</Text>
@@ -829,5 +1000,103 @@ const styles = StyleSheet.create({
     color: '#10b981',
     fontWeight: '600',
     marginBottom: 5,
+  },
+  galleryCount: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+    padding: 15,
+    paddingBottom: 5,
+  },
+  photoCard: {
+    flex: 1,
+    margin: 5,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    maxWidth: '48%',
+  },
+  photoImage: {
+    width: '100%',
+    height: 180,
+    backgroundColor: '#f5f5f5',
+  },
+  photoInfo: {
+    padding: 12,
+  },
+  photoName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 3,
+  },
+  photoSeries: {
+    fontSize: 12,
+    color: '#6366f1',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  fullScreenImage: {
+    width: '100%',
+    height: '70%',
+  },
+  modalInfo: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 5,
+  },
+  modalSeries: {
+    fontSize: 16,
+    color: '#a5b4fc',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    marginTop: 30,
+    justifyContent: 'space-around',
+  },
+  modalButton: {
+    paddingHorizontal: 30,
+    paddingVertical: 12,
+    borderRadius: 8,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  deleteButton: {
+    backgroundColor: '#ef4444',
+  },
+  closeButton: {
+    backgroundColor: '#6366f1',
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#bbb',
+    textAlign: 'center',
+    marginBottom: 20,
   },
 });
