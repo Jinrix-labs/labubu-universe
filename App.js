@@ -569,6 +569,215 @@ function CollectionScreen({ user, onBrowse }) {
   );
 }
 
+// Analytics Screen
+function AnalyticsScreen({ user, onBack }) {
+  const [userCollection, setUserCollection] = useState({ owned: [], wishlist: [], photos: {} });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadUserCollection();
+  }, []);
+
+  const loadUserCollection = async () => {
+    try {
+      const docRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        setUserCollection(docSnap.data());
+      }
+    } catch (error) {
+      console.error('Error loading collection:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Calculate analytics
+  const calculateAnalytics = () => {
+    const ownedLabubus = LABUBU_DATA.filter(l => userCollection.owned.includes(l.id));
+    const wishlistLabubus = LABUBU_DATA.filter(l => userCollection.wishlist.includes(l.id));
+    
+    // Basic stats
+    const totalOwned = ownedLabubus.length;
+    const totalWishlist = wishlistLabubus.length;
+    const totalPhotos = Object.keys(userCollection.photos || {}).length;
+    
+    // Value calculations
+    const ownedValue = ownedLabubus.reduce((sum, labubu) => {
+      const avgValue = (labubu.estimatedValue?.min + labubu.estimatedValue?.max) / 2;
+      return sum + (avgValue || 0);
+    }, 0);
+    
+    const wishlistValue = wishlistLabubus.reduce((sum, labubu) => {
+      const avgValue = (labubu.estimatedValue?.min + labubu.estimatedValue?.max) / 2;
+      return sum + (avgValue || 0);
+    }, 0);
+    
+    // Series breakdown
+    const seriesStats = {};
+    ownedLabubus.forEach(labubu => {
+      if (!seriesStats[labubu.series]) {
+        seriesStats[labubu.series] = { owned: 0, total: 0, value: 0 };
+      }
+      seriesStats[labubu.series].owned++;
+      seriesStats[labubu.series].value += (labubu.estimatedValue?.min + labubu.estimatedValue?.max) / 2 || 0;
+    });
+    
+    // Count total in each series
+    LABUBU_DATA.forEach(labubu => {
+      if (!seriesStats[labubu.series]) {
+        seriesStats[labubu.series] = { owned: 0, total: 0, value: 0 };
+      }
+      seriesStats[labubu.series].total++;
+    });
+    
+    // Rarity breakdown
+    const rarityStats = {};
+    ownedLabubus.forEach(labubu => {
+      rarityStats[labubu.rarity] = (rarityStats[labubu.rarity] || 0) + 1;
+    });
+    
+    // Most valuable items
+    const mostValuable = ownedLabubus
+      .sort((a, b) => (b.estimatedValue?.max || 0) - (a.estimatedValue?.max || 0))
+      .slice(0, 5);
+    
+    // Recent additions (by release date)
+    const recentReleases = ownedLabubus
+      .sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate))
+      .slice(0, 5);
+    
+    return {
+      totalOwned,
+      totalWishlist,
+      totalPhotos,
+      ownedValue,
+      wishlistValue,
+      seriesStats,
+      rarityStats,
+      mostValuable,
+      recentReleases
+    };
+  };
+
+  const analytics = calculateAnalytics();
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#6366f1" />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={onBack}>
+          <Text style={styles.backButton}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Collection Analytics</Text>
+        <View style={{ width: 60 }} />
+      </View>
+
+      <ScrollView style={styles.analyticsScroll}>
+        {/* Overview Cards */}
+        <View style={styles.overviewGrid}>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{analytics.totalOwned}</Text>
+            <Text style={styles.statLabel}>Owned</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{analytics.totalWishlist}</Text>
+            <Text style={styles.statLabel}>Wishlist</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>{analytics.totalPhotos}</Text>
+            <Text style={styles.statLabel}>Photos</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>${analytics.ownedValue.toFixed(0)}</Text>
+            <Text style={styles.statLabel}>Collection Value</Text>
+          </View>
+        </View>
+
+        {/* Series Progress */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Series Progress</Text>
+          {Object.entries(analytics.seriesStats).map(([series, stats]) => (
+            <View key={series} style={styles.seriesItem}>
+              <View style={styles.seriesHeader}>
+                <Text style={styles.seriesName}>{series}</Text>
+                <Text style={styles.seriesProgress}>
+                  {stats.owned}/{stats.total} ({Math.round((stats.owned / stats.total) * 100)}%)
+                </Text>
+              </View>
+              <View style={styles.progressBar}>
+                <View 
+                  style={[
+                    styles.progressFill, 
+                    { width: `${(stats.owned / stats.total) * 100}%` }
+                  ]} 
+                />
+              </View>
+              <Text style={styles.seriesValue}>Value: ${stats.value.toFixed(0)}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Rarity Breakdown */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Rarity Breakdown</Text>
+          <View style={styles.rarityGrid}>
+            {Object.entries(analytics.rarityStats).map(([rarity, count]) => (
+              <View key={rarity} style={styles.rarityCard}>
+                <Text style={[styles.rarityBadge, styles[`rarity${rarity.replace(' ', '')}`]]}>
+                  {rarity}
+                </Text>
+                <Text style={styles.rarityCount}>{count}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Most Valuable */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Most Valuable Items</Text>
+          {analytics.mostValuable.map((labubu, index) => (
+            <View key={labubu.id} style={styles.valueItem}>
+              <Text style={styles.valueRank}>#{index + 1}</Text>
+              <Image source={{ uri: labubu.image }} style={styles.valueImage} />
+              <View style={styles.valueInfo}>
+                <Text style={styles.valueName}>{labubu.name}</Text>
+                <Text style={styles.valueSeries}>{labubu.series}</Text>
+              </View>
+              <Text style={styles.valueAmount}>
+                ${labubu.estimatedValue?.min}-${labubu.estimatedValue?.max}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Recent Additions */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Recent Additions</Text>
+          {analytics.recentReleases.map((labubu, index) => (
+            <View key={labubu.id} style={styles.recentItem}>
+              <Image source={{ uri: labubu.image }} style={styles.recentImage} />
+              <View style={styles.recentInfo}>
+                <Text style={styles.recentName}>{labubu.name}</Text>
+                <Text style={styles.recentSeries}>{labubu.series}</Text>
+                <Text style={styles.recentDate}>{labubu.releaseDate}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
 // Photo Studio Screen
 function PhotoStudioScreen({ user, onBack }) {
   const [userCollection, setUserCollection] = useState({ owned: [], wishlist: [], photos: {} });
@@ -759,6 +968,15 @@ function MainHub({ user, onLogout }) {
     );
   }
 
+  if (currentScreen === 'analytics') {
+    return (
+      <AnalyticsScreen
+        user={user}
+        onBack={() => setCurrentScreen('hub')}
+      />
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -784,12 +1002,20 @@ function MainHub({ user, onLogout }) {
           <Text style={styles.cardSubtitle}>Coming later</Text>
         </View>
 
-        <TouchableOpacity
+        <TouchableOpacity 
           style={styles.card}
           onPress={() => setCurrentScreen('photoStudio')}
         >
           <Text style={styles.cardTitle}>📸 Photo Studio</Text>
           <Text style={styles.cardSubtitle}>View all your Labubu photos</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.card}
+          onPress={() => setCurrentScreen('analytics')}
+        >
+          <Text style={styles.cardTitle}>📊 Analytics</Text>
+          <Text style={styles.cardSubtitle}>Collection stats and insights</Text>
         </TouchableOpacity>
 
         <View style={styles.card}>
@@ -1297,5 +1523,185 @@ const styles = StyleSheet.create({
     color: '#bbb',
     textAlign: 'center',
     marginBottom: 20,
+  },
+  analyticsScroll: {
+    flex: 1,
+    padding: 15,
+  },
+  overviewGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  statCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    width: '48%',
+    marginBottom: 10,
+  },
+  statNumber: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#6366f1',
+    marginBottom: 5,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
+  section: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 15,
+  },
+  seriesItem: {
+    marginBottom: 15,
+  },
+  seriesHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  seriesName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+  },
+  seriesProgress: {
+    fontSize: 12,
+    color: '#666',
+  },
+  progressBar: {
+    height: 6,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginBottom: 5,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#6366f1',
+    borderRadius: 3,
+  },
+  seriesValue: {
+    fontSize: 12,
+    color: '#10b981',
+    fontWeight: '500',
+  },
+  rarityGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  rarityCard: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+    width: '48%',
+    marginBottom: 10,
+  },
+  rarityBadge: {
+    fontSize: 10,
+    fontWeight: '600',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 5,
+  },
+  rarityCount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  valueItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  valueRank: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#6366f1',
+    width: 30,
+  },
+  valueImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  valueInfo: {
+    flex: 1,
+  },
+  valueName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 2,
+  },
+  valueSeries: {
+    fontSize: 12,
+    color: '#666',
+  },
+  valueAmount: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#10b981',
+  },
+  recentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  recentImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  recentInfo: {
+    flex: 1,
+  },
+  recentName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 2,
+  },
+  recentSeries: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 2,
+  },
+  recentDate: {
+    fontSize: 11,
+    color: '#999',
   },
 });
