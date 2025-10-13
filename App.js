@@ -170,13 +170,13 @@ function BrowseScreen({ user, onBack }) {
     .filter(labubu => {
       // Series filter
       const seriesMatch = selectedSeries === 'All' || labubu.series === selectedSeries;
-      
+
       // Search filter
-      const searchMatch = searchQuery === '' || 
+      const searchMatch = searchQuery === '' ||
         labubu.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         labubu.series.toLowerCase().includes(searchQuery.toLowerCase()) ||
         labubu.color.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       return seriesMatch && searchMatch;
     })
     .sort((a, b) => {
@@ -421,7 +421,7 @@ function CollectionScreen({ user, onBrowse, onBack }) {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaType.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -434,7 +434,7 @@ function CollectionScreen({ user, onBrowse, onBack }) {
 
   const pickImage = async (labubuId) => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaType.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -586,7 +586,7 @@ function AnalyticsScreen({ user, onBack }) {
     try {
       const docRef = doc(db, 'users', user.uid);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         setUserCollection(docSnap.data());
       }
@@ -601,23 +601,23 @@ function AnalyticsScreen({ user, onBack }) {
   const calculateAnalytics = () => {
     const ownedLabubus = LABUBU_DATA.filter(l => userCollection.owned.includes(l.id));
     const wishlistLabubus = LABUBU_DATA.filter(l => userCollection.wishlist.includes(l.id));
-    
+
     // Basic stats
     const totalOwned = ownedLabubus.length;
     const totalWishlist = wishlistLabubus.length;
     const totalPhotos = Object.keys(userCollection.photos || {}).length;
-    
+
     // Value calculations
     const ownedValue = ownedLabubus.reduce((sum, labubu) => {
       const avgValue = (labubu.estimatedValue?.min + labubu.estimatedValue?.max) / 2;
       return sum + (avgValue || 0);
     }, 0);
-    
+
     const wishlistValue = wishlistLabubus.reduce((sum, labubu) => {
       const avgValue = (labubu.estimatedValue?.min + labubu.estimatedValue?.max) / 2;
       return sum + (avgValue || 0);
     }, 0);
-    
+
     // Series breakdown
     const seriesStats = {};
     ownedLabubus.forEach(labubu => {
@@ -627,7 +627,7 @@ function AnalyticsScreen({ user, onBack }) {
       seriesStats[labubu.series].owned++;
       seriesStats[labubu.series].value += (labubu.estimatedValue?.min + labubu.estimatedValue?.max) / 2 || 0;
     });
-    
+
     // Count total in each series
     LABUBU_DATA.forEach(labubu => {
       if (!seriesStats[labubu.series]) {
@@ -635,23 +635,23 @@ function AnalyticsScreen({ user, onBack }) {
       }
       seriesStats[labubu.series].total++;
     });
-    
+
     // Rarity breakdown
     const rarityStats = {};
     ownedLabubus.forEach(labubu => {
       rarityStats[labubu.rarity] = (rarityStats[labubu.rarity] || 0) + 1;
     });
-    
+
     // Most valuable items
     const mostValuable = ownedLabubus
       .sort((a, b) => (b.estimatedValue?.max || 0) - (a.estimatedValue?.max || 0))
       .slice(0, 5);
-    
+
     // Recent additions (by release date)
     const recentReleases = ownedLabubus
       .sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate))
       .slice(0, 5);
-    
+
     return {
       totalOwned,
       totalWishlist,
@@ -718,11 +718,11 @@ function AnalyticsScreen({ user, onBack }) {
                 </Text>
               </View>
               <View style={styles.progressBar}>
-                <View 
+                <View
                   style={[
-                    styles.progressFill, 
+                    styles.progressFill,
                     { width: `${(stats.owned / stats.total) * 100}%` }
-                  ]} 
+                  ]}
                 />
               </View>
               <Text style={styles.seriesValue}>Value: ${stats.value.toFixed(0)}</Text>
@@ -1007,7 +1007,7 @@ function MainHub({ user, onLogout }) {
           <Text style={styles.cardSubtitle}>Coming later</Text>
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.card}
           onPress={() => setCurrentScreen('photoStudio')}
         >
@@ -1015,7 +1015,7 @@ function MainHub({ user, onLogout }) {
           <Text style={styles.cardSubtitle}>View all your Labubu photos</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.card}
           onPress={() => setCurrentScreen('analytics')}
         >
