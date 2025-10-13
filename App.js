@@ -111,6 +111,8 @@ function AuthScreen() {
 // Browse All Labubus Screen
 function BrowseScreen({ user, onBack }) {
   const [selectedSeries, setSelectedSeries] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('name');
   const [userCollection, setUserCollection] = useState({ owned: [], wishlist: [], photos: {} });
   const [loading, setLoading] = useState(true);
 
@@ -163,9 +165,37 @@ function BrowseScreen({ user, onBack }) {
     }
   };
 
-  const filteredLabubus = selectedSeries === 'All'
-    ? LABUBU_DATA
-    : LABUBU_DATA.filter(l => l.series === selectedSeries);
+  // Filter and sort Labubus
+  const filteredLabubus = LABUBU_DATA
+    .filter(labubu => {
+      // Series filter
+      const seriesMatch = selectedSeries === 'All' || labubu.series === selectedSeries;
+      
+      // Search filter
+      const searchMatch = searchQuery === '' || 
+        labubu.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        labubu.series.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        labubu.color.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      return seriesMatch && searchMatch;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'series':
+          return a.series.localeCompare(b.series);
+        case 'value':
+          return (b.estimatedValue?.max || 0) - (a.estimatedValue?.max || 0);
+        case 'rarity':
+          const rarityOrder = { 'Common': 1, 'Rare': 2, 'Limited': 3, 'Secret': 4, 'Ultra Rare': 5 };
+          return (rarityOrder[a.rarity] || 0) - (rarityOrder[b.rarity] || 0);
+        case 'releaseDate':
+          return new Date(b.releaseDate) - new Date(a.releaseDate);
+        default:
+          return 0;
+      }
+    });
 
   if (loading) {
     return (
@@ -183,6 +213,51 @@ function BrowseScreen({ user, onBack }) {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Browse All Labubus</Text>
         <View style={{ width: 60 }} />
+      </View>
+
+      {/* Search Bar */}
+      <View style={styles.searchWrapper}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by name, series, or color..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor="#999"
+        />
+      </View>
+
+      {/* Sort Options */}
+      <View style={styles.sortWrapper}>
+        <Text style={styles.sortLabel}>Sort by:</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.sortContent}
+        >
+          {[
+            { key: 'name', label: 'Name' },
+            { key: 'series', label: 'Series' },
+            { key: 'value', label: 'Value' },
+            { key: 'rarity', label: 'Rarity' },
+            { key: 'releaseDate', label: 'Newest' }
+          ].map(option => (
+            <TouchableOpacity
+              key={option.key}
+              style={[
+                styles.sortPill,
+                sortBy === option.key && styles.sortPillActive
+              ]}
+              onPress={() => setSortBy(option.key)}
+            >
+              <Text style={[
+                styles.sortPillText,
+                sortBy === option.key && styles.sortPillTextActive
+              ]}>
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       {/* Series Filter Pills */}
@@ -212,6 +287,13 @@ function BrowseScreen({ user, onBack }) {
         </ScrollView>
       </View>
 
+      {/* Results Counter */}
+      <View style={styles.resultsWrapper}>
+        <Text style={styles.resultsText}>
+          {filteredLabubus.length} Labubu{filteredLabubus.length !== 1 ? 's' : ''} found
+        </Text>
+      </View>
+
       {/* Labubu Grid */}
       <FlatList
         data={filteredLabubus}
@@ -221,10 +303,22 @@ function BrowseScreen({ user, onBack }) {
         renderItem={({ item }) => (
           <View style={styles.labubuCard}>
             <Image source={{ uri: item.image }} style={styles.labubuImage} />
-            <Text style={styles.labubuName}>{item.name}</Text>
-            <Text style={styles.labubuSeries}>{item.series}</Text>
-            <Text style={styles.labubuDate}>{item.releaseDate}</Text>
-            <Text style={styles.labubuDimensions}>{item.dimensions}</Text>
+            <View style={styles.labubuInfo}>
+              <Text style={styles.labubuName}>{item.name}</Text>
+              <Text style={styles.labubuSeries}>{item.series}</Text>
+              <View style={styles.labubuMeta}>
+                <Text style={[styles.labubuRarity, styles[`rarity${item.rarity?.replace(' ', '')}`]]}>
+                  {item.rarity}
+                </Text>
+                {item.estimatedValue && (
+                  <Text style={styles.labubuValue}>
+                    ${item.estimatedValue.min}-${item.estimatedValue.max}
+                  </Text>
+                )}
+              </View>
+              <Text style={styles.labubuDate}>{item.releaseDate}</Text>
+              <Text style={styles.labubuDimensions}>{item.dimensions}</Text>
+            </View>
 
             <View style={styles.buttonRow}>
               <TouchableOpacity
@@ -854,11 +948,76 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#999',
   },
+  searchWrapper: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  searchInput: {
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    borderRadius: 25,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  sortWrapper: {
+    backgroundColor: '#fff',
+    paddingVertical: 12,
+    paddingLeft: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sortLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    marginRight: 10,
+  },
+  sortContent: {
+    paddingRight: 15,
+  },
+  sortPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f5f5f5',
+    marginRight: 8,
+  },
+  sortPillActive: {
+    backgroundColor: '#6366f1',
+  },
+  sortPillText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
+  sortPillTextActive: {
+    color: '#fff',
+    fontWeight: '600',
+  },
   filterWrapper: {
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
     paddingVertical: 12,
+  },
+  resultsWrapper: {
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  resultsText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
   },
   filterContent: {
     paddingHorizontal: 15,
@@ -889,7 +1048,7 @@ const styles = StyleSheet.create({
     margin: 5,
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 15,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -897,11 +1056,12 @@ const styles = StyleSheet.create({
     elevation: 3,
     maxWidth: '48%',
   },
+  labubuInfo: {
+    padding: 12,
+  },
   labubuImage: {
     width: '100%',
     height: 120,
-    borderRadius: 8,
-    marginBottom: 10,
     backgroundColor: '#f5f5f5',
   },
   labubuName: {
@@ -924,6 +1084,45 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#999',
     marginBottom: 10,
+  },
+  labubuMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  labubuRarity: {
+    fontSize: 10,
+    fontWeight: '600',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  rarityCommon: {
+    backgroundColor: '#e5e7eb',
+    color: '#374151',
+  },
+  rarityRare: {
+    backgroundColor: '#dbeafe',
+    color: '#1e40af',
+  },
+  rarityLimited: {
+    backgroundColor: '#fef3c7',
+    color: '#92400e',
+  },
+  raritySecret: {
+    backgroundColor: '#fce7f3',
+    color: '#be185d',
+  },
+  rarityUltraRare: {
+    backgroundColor: '#f3e8ff',
+    color: '#7c3aed',
+  },
+  labubuValue: {
+    fontSize: 10,
+    color: '#10b981',
+    fontWeight: '600',
   },
   buttonRow: {
     flexDirection: 'row',
