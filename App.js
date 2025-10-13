@@ -359,7 +359,7 @@ function BrowseScreen({ user, onBack }) {
 }
 
 // Collection Screen
-function CollectionScreen({ user, onBrowse }) {
+function CollectionScreen({ user, onBrowse, onBack }) {
   const [userCollection, setUserCollection] = useState({ owned: [], wishlist: [], photos: {} });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('owned');
@@ -494,7 +494,11 @@ function CollectionScreen({ user, onBrowse }) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity onPress={onBack}>
+          <Text style={styles.backButton}>← Back</Text>
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>My Collection</Text>
+        <View style={{ width: 60 }} />
       </View>
 
       {/* Tabs */}
@@ -946,6 +950,7 @@ function MainHub({ user, onLogout }) {
       <CollectionScreen
         user={user}
         onBrowse={() => setCurrentScreen('browse')}
+        onBack={() => setCurrentScreen('hub')}
       />
     );
   }
