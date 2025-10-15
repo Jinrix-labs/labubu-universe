@@ -364,6 +364,8 @@ function CollectionScreen({ user, onBrowse, onBack }) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('owned');
   const [uploadingId, setUploadingId] = useState(null);
+  const [showPhotoOptions, setShowPhotoOptions] = useState(false);
+  const [selectedLabubuId, setSelectedLabubuId] = useState(null);
 
   useEffect(() => {
     loadUserCollection();
@@ -385,35 +387,13 @@ function CollectionScreen({ user, onBrowse, onBack }) {
   };
 
   const handleAddPhoto = async (labubuId) => {
-    // Request permissions
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'We need camera roll permissions to add photos!');
-      return;
-    }
-
-    // Show options: Take Photo or Choose from Library
-    Alert.alert(
-      'Add Photo',
-      'Choose an option',
-      [
-        {
-          text: 'Take Photo',
-          onPress: () => takePhoto(labubuId),
-        },
-        {
-          text: 'Choose from Library',
-          onPress: () => pickImage(labubuId),
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ]
-    );
+    // Show modal with options: Take Photo or Choose from Library
+    setSelectedLabubuId(labubuId);
+    setShowPhotoOptions(true);
   };
 
   const takePhoto = async (labubuId) => {
+    setShowPhotoOptions(false);
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission Denied', 'We need camera permissions to take photos!');
@@ -421,27 +401,47 @@ function CollectionScreen({ user, onBrowse, onBack }) {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
+      allowsMultipleSelection: false,
     });
 
-    if (!result.canceled) {
+    if (!result.canceled && result.assets && result.assets.length > 0) {
       await uploadPhoto(labubuId, result.assets[0].uri);
     }
+    // If result.canceled is true, the user tapped cancel - no action needed
   };
 
   const pickImage = async (labubuId) => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-    });
+    setShowPhotoOptions(false);
 
-    if (!result.canceled) {
-      await uploadPhoto(labubuId, result.assets[0].uri);
+    try {
+      // Request permissions first
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      console.log('Permission status:', status);
+
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'We need access to your photo library to add photos!');
+        return;
+      }
+
+      console.log('Launching image library...');
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false, // Try without editing first
+        quality: 0.8,
+      });
+
+      console.log('Image picker result:', result);
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        await uploadPhoto(labubuId, result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to open photo library. Please try again.');
     }
   };
 
@@ -569,6 +569,42 @@ function CollectionScreen({ user, onBrowse, onBack }) {
           )}
         />
       )}
+
+      {/* Photo Options Modal */}
+      <Modal
+        visible={showPhotoOptions}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowPhotoOptions(false)}
+      >
+        <View style={styles.photoOptionsOverlay}>
+          <View style={styles.photoOptionsModal}>
+            <Text style={styles.photoOptionsTitle}>Add Photo</Text>
+            <Text style={styles.photoOptionsSubtitle}>Choose an option</Text>
+
+            <TouchableOpacity
+              style={styles.photoOptionButton}
+              onPress={() => takePhoto(selectedLabubuId)}
+            >
+              <Text style={styles.photoOptionText}>📷 Take Photo</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.photoOptionButton}
+              onPress={() => pickImage(selectedLabubuId)}
+            >
+              <Text style={styles.photoOptionText}>🖼️ Choose from Library</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.photoOptionCancel}
+              onPress={() => setShowPhotoOptions(false)}
+            >
+              <Text style={styles.photoOptionCancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -1708,5 +1744,60 @@ const styles = StyleSheet.create({
   recentDate: {
     fontSize: 11,
     color: '#999',
+  },
+  // Photo Options Modal Styles
+  photoOptionsOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  photoOptionsModal: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 300,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  photoOptionsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  photoOptionsSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  photoOptionButton: {
+    backgroundColor: '#6366f1',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  photoOptionText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  photoOptionCancel: {
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  photoOptionCancelText: {
+    color: '#666',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
