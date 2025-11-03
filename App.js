@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image, FlatList, Alert, Modal, Pressable } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image, FlatList, Alert, Modal, Pressable, Linking } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -26,8 +26,8 @@ export const auth = initializeAuth(app, { persistence: getReactNativePersistence
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-// Import real Labubu dataset
-import { LABUBU_DATA, SERIES_OPTIONS } from './labubuData';
+// Firestore Labubu loader
+import { useLabubus } from './useLabubus';
 
 // Auth Screen Component
 function AuthScreen() {
@@ -115,6 +115,7 @@ function BrowseScreen({ user, onBack }) {
   const [sortBy, setSortBy] = useState('name');
   const [userCollection, setUserCollection] = useState({ owned: [], wishlist: [], photos: {} });
   const [loading, setLoading] = useState(true);
+  const { items: ALL_LABUBUS, seriesOptions: SERIES_OPTIONS_REMOTE, loading: catalogLoading } = useLabubus();
 
   useEffect(() => {
     loadUserCollection();
@@ -165,8 +166,8 @@ function BrowseScreen({ user, onBack }) {
     }
   };
 
-  // Filter and sort Labubus
-  const filteredLabubus = LABUBU_DATA
+  // Filter and sort Labubus (from Firestore)
+  const filteredLabubus = ALL_LABUBUS
     .filter(labubu => {
       // Series filter
       const seriesMatch = selectedSeries === 'All' || labubu.series === selectedSeries;
@@ -197,7 +198,7 @@ function BrowseScreen({ user, onBack }) {
       }
     });
 
-  if (loading) {
+  if (loading || catalogLoading) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#6366f1" />
@@ -267,7 +268,7 @@ function BrowseScreen({ user, onBack }) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterContent}
         >
-          {SERIES_OPTIONS.map(series => (
+          {SERIES_OPTIONS_REMOTE.map(series => (
             <TouchableOpacity
               key={series}
               style={[
@@ -479,11 +480,12 @@ function CollectionScreen({ user, onBrowse, onBack }) {
     }
   };
 
-  const ownedLabubus = LABUBU_DATA.filter(l => userCollection.owned.includes(l.id));
-  const wishlistLabubus = LABUBU_DATA.filter(l => userCollection.wishlist.includes(l.id));
+  const { items: ALL_LABUBUS_COLLECTION, loading: catalogLoadingCollection } = useLabubus();
+  const ownedLabubus = ALL_LABUBUS_COLLECTION.filter(l => userCollection.owned.includes(l.id));
+  const wishlistLabubus = ALL_LABUBUS_COLLECTION.filter(l => userCollection.wishlist.includes(l.id));
   const currentLabubus = activeTab === 'owned' ? ownedLabubus : wishlistLabubus;
 
-  if (loading) {
+  if (loading || catalogLoadingCollection) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#6366f1" />
@@ -633,10 +635,12 @@ function AnalyticsScreen({ user, onBack }) {
     }
   };
 
+  const { items: ALL_LABUBUS_ANALYTICS, loading: catalogLoadingAnalytics } = useLabubus();
+
   // Calculate analytics
   const calculateAnalytics = () => {
-    const ownedLabubus = LABUBU_DATA.filter(l => userCollection.owned.includes(l.id));
-    const wishlistLabubus = LABUBU_DATA.filter(l => userCollection.wishlist.includes(l.id));
+    const ownedLabubus = ALL_LABUBUS_ANALYTICS.filter(l => userCollection.owned.includes(l.id));
+    const wishlistLabubus = ALL_LABUBUS_ANALYTICS.filter(l => userCollection.wishlist.includes(l.id));
 
     // Basic stats
     const totalOwned = ownedLabubus.length;
@@ -665,7 +669,7 @@ function AnalyticsScreen({ user, onBack }) {
     });
 
     // Count total in each series
-    LABUBU_DATA.forEach(labubu => {
+    ALL_LABUBUS_ANALYTICS.forEach(labubu => {
       if (!seriesStats[labubu.series]) {
         seriesStats[labubu.series] = { owned: 0, total: 0, value: 0 };
       }
@@ -703,7 +707,7 @@ function AnalyticsScreen({ user, onBack }) {
 
   const analytics = calculateAnalytics();
 
-  if (loading) {
+  if (loading || catalogLoadingAnalytics) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#6366f1" />
@@ -818,11 +822,118 @@ function AnalyticsScreen({ user, onBack }) {
   );
 }
 
+// Store Screen
+function StoreScreen({ onBack }) {
+  const { items, loading } = useLabubus();
+  const [queryText, setQueryText] = useState('');
+  const [sortBy, setSortBy] = useState('name');
+
+  const withLinks = React.useMemo(
+    () => items.filter(i => i?.storeLinks?.popmart),
+    [items]
+  );
+
+  const filtered = React.useMemo(() => {
+    const q = queryText.trim().toLowerCase();
+    let list = q
+      ? withLinks.filter(i =>
+        (i.name || '').toLowerCase().includes(q) ||
+        (i.series || '').toLowerCase().includes(q) ||
+        [i.series, i.rarity].filter(Boolean).some(t => (t || '').toLowerCase().includes(q))
+      )
+      : withLinks;
+
+    switch (sortBy) {
+      case 'price': return [...list].sort((a, b) => (a.originalPrice ?? 0) - (b.originalPrice ?? 0));
+      case 'series': return [...list].sort((a, b) => (a.series || '').localeCompare(b.series || ''));
+      default: return [...list].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }
+  }, [withLinks, queryText, sortBy]);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#6366f1" />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={onBack}>
+          <Text style={styles.backButton}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Store</Text>
+        <View style={{ width: 60 }} />
+      </View>
+
+      <View style={styles.searchWrapper}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search store…"
+          value={queryText}
+          onChangeText={setQueryText}
+          placeholderTextColor="#999"
+        />
+      </View>
+
+      <View style={styles.sortWrapper}>
+        <Text style={styles.sortLabel}>Sort by:</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sortContent}>
+          {[
+            { key: 'name', label: 'Name' },
+            { key: 'price', label: 'Price' },
+            { key: 'series', label: 'Series' },
+          ].map(opt => (
+            <TouchableOpacity
+              key={opt.key}
+              style={[styles.sortPill, sortBy === opt.key && styles.sortPillActive]}
+              onPress={() => setSortBy(opt.key)}
+            >
+              <Text style={[styles.sortPillText, sortBy === opt.key && styles.sortPillTextActive]}>
+                {opt.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      <FlatList
+        data={filtered}
+        keyExtractor={item => String(item.id || item.docId)}
+        contentContainerStyle={styles.gridContent}
+        renderItem={({ item }) => (
+          <View style={styles.labubuCard}>
+            <Image source={{ uri: item.image || '' }} style={styles.labubuImage} />
+            <View style={styles.labubuInfo}>
+              <Text style={styles.labubuName}>{item.name}</Text>
+              <Text style={styles.labubuSeries}>{item.series}</Text>
+              {item.originalPrice != null && (
+                <Text style={styles.labubuValue}>USD ${Number(item.originalPrice).toFixed(2)}</Text>
+              )}
+            </View>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.actionButton, styles.actionButtonActive]}
+                onPress={() => Linking.openURL(item.storeLinks.popmart)}
+              >
+                <Text style={[styles.actionButtonText, styles.actionButtonTextActive]}>Buy</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      />
+    </View>
+  );
+}
+
 // Photo Studio Screen
 function PhotoStudioScreen({ user, onBack }) {
   const [userCollection, setUserCollection] = useState({ owned: [], wishlist: [], photos: {} });
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const { items: ALL_LABUBUS_PHOTO, loading: catalogLoadingPhoto } = useLabubus();
 
   useEffect(() => {
     loadUserCollection();
@@ -877,7 +988,7 @@ function PhotoStudioScreen({ user, onBack }) {
 
   // Get all photos with their Labubu info
   const photoGallery = Object.entries(userCollection.photos || {}).map(([labubuId, photoUrl]) => {
-    const labubu = LABUBU_DATA.find(l => l.id === labubuId);
+    const labubu = ALL_LABUBUS_PHOTO.find(l => String(l.id) === String(labubuId));
     return {
       labubuId,
       photoUrl,
@@ -886,7 +997,7 @@ function PhotoStudioScreen({ user, onBack }) {
     };
   });
 
-  if (loading) {
+  if (loading || catalogLoadingPhoto) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#6366f1" />
@@ -1000,6 +1111,14 @@ function MainHub({ user, onLogout }) {
     );
   }
 
+  if (currentScreen === 'store') {
+    return (
+      <StoreScreen
+        onBack={() => setCurrentScreen('hub')}
+      />
+    );
+  }
+
   if (currentScreen === 'photoStudio') {
     return (
       <PhotoStudioScreen
@@ -1038,10 +1157,13 @@ function MainHub({ user, onLogout }) {
           <Text style={styles.cardSubtitle}>View and manage your Labubus</Text>
         </TouchableOpacity>
 
-        <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => setCurrentScreen('store')}
+        >
           <Text style={styles.cardTitle}>🏪 Store</Text>
-          <Text style={styles.cardSubtitle}>Coming later</Text>
-        </View>
+          <Text style={styles.cardSubtitle}>Browse and buy</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.card}
