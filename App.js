@@ -849,6 +849,89 @@ function AnalyticsScreen({ user, onBack }) {
   );
 }
 
+// Profile Screen
+function ProfileScreen({ user, onBack }) {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (snap.exists()) {
+          setProfile(snap.data());
+        } else {
+          setProfile({ displayName: user.email, badges: [], counters: {} });
+        }
+      } catch (e) {
+        setProfile({ displayName: user.email, badges: [], counters: {} });
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#6366f1" />
+      </View>
+    );
+  }
+
+  const stats = profile?.counters || {};
+
+  return (
+    <View style={styles.container}>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
+        <TouchableOpacity onPress={onBack}>
+          <Text style={styles.backButton}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Profile</Text>
+        <View style={{ width: 60 }} />
+      </LinearGradient>
+
+      <ScrollView style={styles.hubScroll}>
+        <View style={styles.sectionBubble}>
+          <View style={{ alignItems: 'center' }}>
+            <Image
+              source={{ uri: profile?.avatarUrl || 'https://via.placeholder.com/120/FFE8F0/FFFFFF?text=Labubu' }}
+              style={{ width: 96, height: 96, borderRadius: 999, backgroundColor: '#FFF9F5' }}
+            />
+            <Text style={[styles.cardTitle, { marginTop: 10 }]}>
+              {profile?.displayName || user.email}
+            </Text>
+            {profile?.bio ? (
+              <Text style={styles.cardSubtitle}>{profile.bio}</Text>
+            ) : null}
+          </View>
+
+          <View style={styles.overviewGrid}>
+            {[{ label: 'Owned', value: stats.owned || 0 }, { label: 'Wishlist', value: stats.wishlist || 0 }, { label: 'Photos', value: stats.photos || 0 }, { label: 'Value', value: `$${(stats.value || 0).toFixed(0)}` }].map((s, i) => (
+              <View key={i} style={styles.statCard}>
+                <Text style={styles.statNumber}>{s.value}</Text>
+                <Text style={styles.statLabel}>{s.label}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.sectionBubble}>
+          <Text style={styles.sectionTitle}>Badges</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+            {(profile?.badges || []).map((b) => (
+              <Text key={b} style={[styles.badge, styles.seriesBadge]}>{b}</Text>
+            ))}
+            {(profile?.badges || []).length === 0 && (
+              <Text style={styles.cardSubtitle}>No badges yet</Text>
+            )}
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
 // Store Screen
 function StoreScreen({ onBack }) {
   const { items, loading } = useLabubus();
@@ -1203,6 +1286,15 @@ function MainHub({ user, onLogout }) {
     );
   }
 
+  if (currentScreen === 'profile') {
+    return (
+      <ProfileScreen
+        user={user}
+        onBack={() => setCurrentScreen('hub')}
+      />
+    );
+  }
+
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
@@ -1221,6 +1313,14 @@ function MainHub({ user, onLogout }) {
         >
           <Text style={styles.cardTitle}>📦 Collection</Text>
           <Text style={styles.cardSubtitle}>View and manage your Labubus</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => setCurrentScreen('profile')}
+        >
+          <Text style={styles.cardTitle}>👤 Profile</Text>
+          <Text style={styles.cardSubtitle}>Your stats and badges</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -1405,6 +1505,19 @@ const styles = StyleSheet.create({
   cardSubtitle: {
     fontSize: 14,
     color: '#999',
+  },
+  sectionBubble: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#FFB3D9',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#FFE8F0',
   },
   searchWrapper: {
     backgroundColor: '#fff',
