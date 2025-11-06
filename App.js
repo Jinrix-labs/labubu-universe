@@ -1511,7 +1511,7 @@ function MainHub({ user, onLogout }) {
           style={styles.card}
           onPress={() => setCurrentScreen('collection')}
         >
-          <Text style={styles.cardTitle}>📦 Collection</Text>
+          <Text style={styles.cardTitle}>✨ My Labubu Family</Text>
           <Text style={styles.cardSubtitle}>View and manage your Labubus</Text>
         </TouchableOpacity>
 
@@ -1527,7 +1527,7 @@ function MainHub({ user, onLogout }) {
           style={styles.card}
           onPress={() => setCurrentScreen('store')}
         >
-          <Text style={styles.cardTitle}>🏪 Store</Text>
+          <Text style={styles.cardTitle}>🛍️ Get More Labubus!</Text>
           <Text style={styles.cardSubtitle}>Browse and buy</Text>
         </TouchableOpacity>
 
@@ -1535,7 +1535,7 @@ function MainHub({ user, onLogout }) {
           style={styles.card}
           onPress={() => setCurrentScreen('photoStudio')}
         >
-          <Text style={styles.cardTitle}>📸 Photo Studio</Text>
+          <Text style={styles.cardTitle}>📷 Memory Gallery</Text>
           <Text style={styles.cardSubtitle}>View all your Labubu photos</Text>
         </TouchableOpacity>
 
@@ -1543,12 +1543,12 @@ function MainHub({ user, onLogout }) {
           style={styles.card}
           onPress={() => setCurrentScreen('analytics')}
         >
-          <Text style={styles.cardTitle}>📊 Analytics</Text>
+          <Text style={styles.cardTitle}>✨ Collection Journey</Text>
           <Text style={styles.cardSubtitle}>Collection stats and insights</Text>
         </TouchableOpacity>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>👥 Community Hub</Text>
+          <Text style={styles.cardTitle}>🎀 Community</Text>
           <Text style={styles.cardSubtitle}>Coming later</Text>
         </View>
       </ScrollView>
