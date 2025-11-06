@@ -1509,18 +1509,18 @@ function MainHub({ user, onLogout }) {
 
         <TouchableOpacity
           style={styles.card}
-          onPress={() => setCurrentScreen('collection')}
-        >
-          <Text style={styles.cardTitle}>✨ My Labubu Family</Text>
-          <Text style={styles.cardSubtitle}>View and manage your Labubus</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.card}
           onPress={() => setCurrentScreen('profile')}
         >
           <Text style={styles.cardTitle}>👤 Profile</Text>
           <Text style={styles.cardSubtitle}>Your stats and badges</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => setCurrentScreen('collection')}
+        >
+          <Text style={styles.cardTitle}>✨ My Labubu Family</Text>
+          <Text style={styles.cardSubtitle}>View and manage your Labubus</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
