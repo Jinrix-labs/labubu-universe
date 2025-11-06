@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image, FlatList, Alert, Modal, Pressable, Linking } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -119,6 +121,8 @@ function BrowseScreen({ user, onBack, onNavigate }) {
   const [userCollection, setUserCollection] = useState({ owned: [], wishlist: [], photos: {} });
   const [loading, setLoading] = useState(true);
   const { items: ALL_LABUBUS, seriesOptions: SERIES_OPTIONS_REMOTE, loading: catalogLoading } = useLabubus();
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [confettiKey, setConfettiKey] = useState(0);
 
   useEffect(() => {
     loadUserCollection();
@@ -139,8 +143,21 @@ function BrowseScreen({ user, onBack, onNavigate }) {
     }
   };
 
+  const awardBadge = async (badge) => {
+    try {
+      const refUser = doc(db, 'users', user.uid);
+      const snap = await getDoc(refUser);
+      const current = snap.exists() ? snap.data() : {};
+      const badges = Array.from(new Set([...(current.badges || []), badge]));
+      await setDoc(refUser, { ...current, badges }, { merge: true });
+    } catch (e) {
+      console.error('awardBadge error', e);
+    }
+  };
+
   const toggleOwned = async (labubuId) => {
-    const newOwned = userCollection.owned.includes(labubuId)
+    const wasOwned = userCollection.owned.includes(labubuId);
+    const newOwned = wasOwned
       ? userCollection.owned.filter(id => id !== labubuId)
       : [...userCollection.owned, labubuId];
 
@@ -149,6 +166,22 @@ function BrowseScreen({ user, onBack, onNavigate }) {
 
     try {
       await setDoc(doc(db, 'users', user.uid), newCollection);
+
+      if (!wasOwned) {
+        // Haptics + confetti
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setConfettiKey(prev => prev + 1);
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 1500);
+
+        if (newOwned.length >= 10) {
+          await awardBadge('collector_10');
+        }
+        const labubu = ALL_LABUBUS.find(l => l.id === labubuId);
+        if (labubu?.rarity?.toLowerCase() === 'secret') {
+          await awardBadge('secret_finder');
+        }
+      }
     } catch (error) {
       console.error('Error updating owned:', error);
     }
@@ -382,6 +415,9 @@ function BrowseScreen({ user, onBack, onNavigate }) {
           )}
         />
       )}
+      {showConfetti && (
+        <ConfettiCannon key={confettiKey} count={60} origin={{ x: 0, y: 0 }} fadeOut />
+      )}
       <TabBar currentScreen="browse" onNavigate={onNavigate} />
     </View>
   );
@@ -395,6 +431,8 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
   const [uploadingId, setUploadingId] = useState(null);
   const [showPhotoOptions, setShowPhotoOptions] = useState(false);
   const [selectedLabubuId, setSelectedLabubuId] = useState(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [confettiKey, setConfettiKey] = useState(0);
 
   useEffect(() => {
     loadUserCollection();
@@ -498,6 +536,25 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
       setUserCollection(newCollection);
 
       await setDoc(doc(db, 'users', user.uid), newCollection);
+      // Haptics + confetti
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setConfettiKey(prev => prev + 1);
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 1500);
+
+      // Badge: first photo
+      const hadNoPhotosBefore = Object.keys(userCollection.photos || {}).length === 0;
+      if (hadNoPhotosBefore) {
+        try {
+          const refUser = doc(db, 'users', user.uid);
+          const snap = await getDoc(refUser);
+          const current = snap.exists() ? snap.data() : {};
+          const badges = Array.from(new Set([...(current.badges || []), 'photo_first']));
+          await setDoc(refUser, { ...current, badges }, { merge: true });
+        } catch (e) {
+          console.error('awardBadge photo_first error', e);
+        }
+      }
 
       Alert.alert('Success!', 'Photo uploaded successfully! 🎉');
     } catch (error) {
@@ -635,6 +692,9 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
           </View>
         </View>
       </Modal>
+      {showConfetti && (
+        <ConfettiCannon key={confettiKey} count={60} origin={{ x: 0, y: 0 }} fadeOut />
+      )}
       <TabBar currentScreen="collection" onNavigate={onNavigate} />
     </View>
   );
@@ -939,6 +999,7 @@ function ProfileScreen({ user, onBack, onNavigate }) {
       await setDoc(doc(db, 'users', user.uid), newProfile, { merge: true });
       setProfile(newProfile);
       setIsEditing(false);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert('Saved', 'Your profile has been updated.');
     } catch (e) {
       console.error('Save profile error', e);
