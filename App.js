@@ -921,6 +921,9 @@ function ProfileScreen({ user, onBack, onNavigate }) {
   const [bio, setBio] = useState('');
   const [saving, setSaving] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const [showBadgeToast, setShowBadgeToast] = useState(false);
+  const [badgeToastText, setBadgeToastText] = useState('');
+  const [prevBadgeCount, setPrevBadgeCount] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -944,6 +947,15 @@ function ProfileScreen({ user, onBack, onNavigate }) {
       setDisplayName(profile.displayName || user.email || '');
       setBio(profile.bio || '');
       setAvatarPreview(profile.avatarUrl || null);
+      const count = (profile.badges || []).length;
+      if (count > prevBadgeCount) {
+        const last = (profile.badges || [])[count - 1];
+        setBadgeToastText(`New badge: ${last}`);
+        setShowBadgeToast(true);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setTimeout(() => setShowBadgeToast(false), 2000);
+      }
+      setPrevBadgeCount(count);
     }
   }, [profile]);
 
@@ -1020,6 +1032,13 @@ function ProfileScreen({ user, onBack, onNavigate }) {
       </LinearGradient>
 
       <ScrollView style={styles.hubScroll}>
+        {showBadgeToast && (
+          <View style={{ position: 'absolute', top: 8, left: 16, right: 16, zIndex: 10 }}>
+            <View style={{ backgroundColor: '#111827', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12, alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.2, shadowOffset: { width: 0, height: 2 }, shadowRadius: 6, elevation: 3 }}>
+              <Text style={{ color: '#fff', fontWeight: '700' }}>{badgeToastText}</Text>
+            </View>
+          </View>
+        )}
         <View style={styles.sectionBubble}>
           <View style={{ alignItems: 'center' }}>
             <Image
