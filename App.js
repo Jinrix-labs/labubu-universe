@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image, FlatList, Alert, Modal, Pressable, Linking } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -83,19 +84,21 @@ function AuthScreen() {
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleAuth}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>
-                {isLogin ? 'Login' : 'Sign Up'}
-              </Text>
-            )}
-          </TouchableOpacity>
+          <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.primaryGrad}>
+            <TouchableOpacity
+              onPress={handleAuth}
+              disabled={loading}
+              style={{ paddingVertical: 14, alignItems: 'center' }}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.primaryGradText}>
+                  {isLogin ? 'Login' : 'Sign Up'}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </LinearGradient>
 
           <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
             <Text style={styles.switchText}>
@@ -201,20 +204,35 @@ function BrowseScreen({ user, onBack }) {
   if (loading || catalogLoading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#6366f1" />
+        <FlatList
+          data={Array.from({ length: 6 })}
+          keyExtractor={(_, i) => String(i)}
+          numColumns={2}
+          contentContainerStyle={styles.gridContent}
+          renderItem={() => (
+            <View style={styles.labubuCard}>
+              <View style={[styles.labubuImage, { backgroundColor: '#f3f4f6' }]} />
+              <View style={styles.labubuInfo}>
+                <View style={[styles.skeletonLine, { width: '80%', marginBottom: 8 }]} />
+                <View style={[styles.skeletonLine, { width: '60%', marginBottom: 6 }]} />
+                <View style={[styles.skeletonLine, { width: '50%' }]} />
+              </View>
+            </View>
+          )}
+        />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
         <TouchableOpacity onPress={onBack}>
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Browse All Labubus</Text>
         <View style={{ width: 60 }} />
-      </View>
+      </LinearGradient>
 
       {/* Search Bar */}
       <View style={styles.searchWrapper}>
@@ -296,65 +314,74 @@ function BrowseScreen({ user, onBack }) {
       </View>
 
       {/* Labubu Grid */}
-      <FlatList
-        data={filteredLabubus}
-        keyExtractor={item => item.id}
-        numColumns={2}
-        contentContainerStyle={styles.gridContent}
-        renderItem={({ item }) => (
-          <View style={styles.labubuCard}>
-            <Image source={{ uri: item.image }} style={styles.labubuImage} />
-            <View style={styles.labubuInfo}>
-              <Text style={styles.labubuName}>{item.name}</Text>
-              <Text style={styles.labubuSeries}>{item.series}</Text>
-              <View style={styles.labubuMeta}>
-                <Text style={[styles.labubuRarity, styles[`rarity${item.rarity?.replace(' ', '')}`]]}>
-                  {item.rarity}
-                </Text>
+      {filteredLabubus.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>No results found</Text>
+          <TouchableOpacity style={styles.clearButton} onPress={() => { setSearchQuery(''); setSelectedSeries('All'); }}>
+            <Text style={styles.clearButtonText}>Clear filters</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredLabubus}
+          keyExtractor={item => item.id}
+          numColumns={2}
+          contentContainerStyle={styles.gridContent}
+          renderItem={({ item }) => (
+            <View style={styles.labubuCard}>
+              <Image source={{ uri: item.image }} style={styles.labubuImage} />
+              <View style={styles.labubuInfo}>
+                <Text style={styles.labubuName}>{item.name}</Text>
+                <View style={styles.badgeContainer}>
+                  {item.rarity ? (
+                    <Text style={[styles.badge, styles[`rarity${item.rarity?.replace(' ', '')}`]]}>{item.rarity}</Text>
+                  ) : null}
+                  <Text style={[styles.badge, styles.seriesBadge]}>{item.series}</Text>
+                </View>
                 {item.estimatedValue && (
                   <Text style={styles.labubuValue}>
                     ${item.estimatedValue.min}-${item.estimatedValue.max}
                   </Text>
                 )}
+                <Text style={styles.labubuDate}>{item.releaseDate}</Text>
+                <Text style={styles.labubuDimensions}>{item.dimensions}</Text>
               </View>
-              <Text style={styles.labubuDate}>{item.releaseDate}</Text>
-              <Text style={styles.labubuDimensions}>{item.dimensions}</Text>
-            </View>
 
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={[
-                  styles.actionButton,
-                  userCollection.owned.includes(item.id) && styles.actionButtonActive
-                ]}
-                onPress={() => toggleOwned(item.id)}
-              >
-                <Text style={[
-                  styles.actionButtonText,
-                  userCollection.owned.includes(item.id) && styles.actionButtonTextActive
-                ]}>
-                  {userCollection.owned.includes(item.id) ? '✓ Owned' : 'Own'}
-                </Text>
-              </TouchableOpacity>
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.actionButton,
+                    userCollection.owned.includes(item.id) && styles.actionButtonActive
+                  ]}
+                  onPress={() => toggleOwned(item.id)}
+                >
+                  <Text style={[
+                    styles.actionButtonText,
+                    userCollection.owned.includes(item.id) && styles.actionButtonTextActive
+                  ]}>
+                    {userCollection.owned.includes(item.id) ? '✓ Owned' : 'Own'}
+                  </Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.actionButton,
-                  userCollection.wishlist.includes(item.id) && styles.actionButtonActive
-                ]}
-                onPress={() => toggleWishlist(item.id)}
-              >
-                <Text style={[
-                  styles.actionButtonText,
-                  userCollection.wishlist.includes(item.id) && styles.actionButtonTextActive
-                ]}>
-                  {userCollection.wishlist.includes(item.id) ? '♥ Wish' : 'Wishlist'}
-                </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.actionButton,
+                    userCollection.wishlist.includes(item.id) && styles.actionButtonActive
+                  ]}
+                  onPress={() => toggleWishlist(item.id)}
+                >
+                  <Text style={[
+                    styles.actionButtonText,
+                    userCollection.wishlist.includes(item.id) && styles.actionButtonTextActive
+                  ]}>
+                    {userCollection.wishlist.includes(item.id) ? '♥ Wish' : 'Wishlist'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      )}
     </View>
   );
 }
@@ -495,13 +522,13 @@ function CollectionScreen({ user, onBrowse, onBack }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
         <TouchableOpacity onPress={onBack}>
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Collection</Text>
         <View style={{ width: 60 }} />
-      </View>
+      </LinearGradient>
 
       {/* Tabs */}
       <View style={styles.tabContainer}>
@@ -717,13 +744,13 @@ function AnalyticsScreen({ user, onBack }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
         <TouchableOpacity onPress={onBack}>
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Collection Analytics</Text>
         <View style={{ width: 60 }} />
-      </View>
+      </LinearGradient>
 
       <ScrollView style={styles.analyticsScroll}>
         {/* Overview Cards */}
@@ -850,23 +877,15 @@ function StoreScreen({ onBack }) {
     }
   }, [withLinks, queryText, sortBy]);
 
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#6366f1" />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
         <TouchableOpacity onPress={onBack}>
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Store</Text>
         <View style={{ width: 60 }} />
-      </View>
+      </LinearGradient>
 
       <View style={styles.searchWrapper}>
         <TextInput
@@ -899,31 +918,78 @@ function StoreScreen({ onBack }) {
         </ScrollView>
       </View>
 
-      <FlatList
-        data={filtered}
-        keyExtractor={item => String(item.id || item.docId)}
-        contentContainerStyle={styles.gridContent}
-        renderItem={({ item }) => (
-          <View style={styles.labubuCard}>
-            <Image source={{ uri: item.image || '' }} style={styles.labubuImage} />
-            <View style={styles.labubuInfo}>
-              <Text style={styles.labubuName}>{item.name}</Text>
-              <Text style={styles.labubuSeries}>{item.series}</Text>
-              {item.originalPrice != null && (
-                <Text style={styles.labubuValue}>USD ${Number(item.originalPrice).toFixed(2)}</Text>
-              )}
+      {loading ? (
+        <FlatList
+          data={Array.from({ length: 6 })}
+          keyExtractor={(_, i) => String(i)}
+          numColumns={2}
+          contentContainerStyle={styles.gridContent}
+          renderItem={() => (
+            <View style={styles.labubuCard}>
+              <View style={[styles.labubuImage, { backgroundColor: '#f3f4f6' }]} />
+              <View style={styles.labubuInfo}>
+                <View style={[styles.skeletonLine, { width: '80%', marginBottom: 8 }]} />
+                <View style={[styles.skeletonLine, { width: '60%', marginBottom: 6 }]} />
+                <View style={[styles.skeletonLine, { width: '50%' }]} />
+              </View>
+              <View style={styles.buttonRow}>
+                <View style={[styles.actionButton, { backgroundColor: '#e5e7eb' }]} />
+              </View>
             </View>
-            <View style={styles.buttonRow}>
-              <TouchableOpacity
-                style={[styles.actionButton, styles.actionButtonActive]}
-                onPress={() => Linking.openURL(item.storeLinks.popmart)}
-              >
-                <Text style={[styles.actionButtonText, styles.actionButtonTextActive]}>Buy</Text>
-              </TouchableOpacity>
+          )}
+        />
+      ) : filtered.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>
+            {queryText ? 'No items match your search.' : 'No items available in store.'}
+          </Text>
+          {queryText && (
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={() => setQueryText('')}
+            >
+              <Text style={styles.clearButtonText}>Clear search</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      ) : (
+        <FlatList
+          data={filtered}
+          keyExtractor={item => String(item.id || item.docId)}
+          numColumns={2}
+          contentContainerStyle={styles.gridContent}
+          renderItem={({ item }) => (
+            <View style={styles.labubuCard}>
+              <Image source={{ uri: item.image || '' }} style={styles.labubuImage} />
+              <View style={styles.labubuInfo}>
+                <Text style={styles.labubuName}>{item.name}</Text>
+                <View style={styles.badgeContainer}>
+                  {item.rarity && (
+                    <Text style={[styles.badge, styles[`rarity${item.rarity?.replace(' ', '')}`]]}>
+                      {item.rarity}
+                    </Text>
+                  )}
+                  <Text style={[styles.badge, styles.seriesBadge]}>
+                    {item.series}
+                  </Text>
+                </View>
+                {item.originalPrice != null && (
+                  <Text style={styles.labubuValue}>${Number(item.originalPrice).toFixed(2)}</Text>
+                )}
+              </View>
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.buyButton]}
+                  onPress={() => item.storeLinks?.popmart && Linking.openURL(item.storeLinks.popmart)}
+                  disabled={!item.storeLinks?.popmart}
+                >
+                  <Text style={[styles.actionButtonText, styles.buyButtonText]}>🛒 Buy</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      )}
     </View>
   );
 }
@@ -1007,13 +1073,13 @@ function PhotoStudioScreen({ user, onBack }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
         <TouchableOpacity onPress={onBack}>
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Photo Studio</Text>
         <View style={{ width: 60 }} />
-      </View>
+      </LinearGradient>
 
       {photoGallery.length === 0 ? (
         <View style={styles.emptyState}>
@@ -1139,12 +1205,12 @@ function MainHub({ user, onLogout }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Labubu Universe</Text>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
+        <Text style={styles.headerTitle}>Labubu Universe</Text>
         <TouchableOpacity onPress={onLogout} style={styles.logoutButton}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       <ScrollView style={styles.hubScroll}>
         <Text style={styles.welcomeText}>Welcome, {user.email}!</Text>
@@ -1226,7 +1292,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#FFF9F5',
   },
   scrollContent: {
     flexGrow: 1,
@@ -1237,11 +1303,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 10,
-    color: '#333',
+    color: '#FFB3D9',
+    letterSpacing: 0.5,
   },
   subtitle: {
     fontSize: 18,
@@ -1317,15 +1384,17 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   card: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: '#FFFFFF',
+    padding: 24,
+    borderRadius: 20,
+    marginBottom: 16,
+    shadowColor: '#FFB3D9',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#FFE8F0',
   },
   cardTitle: {
     fontSize: 20,
@@ -1451,7 +1520,9 @@ const styles = StyleSheet.create({
   labubuImage: {
     width: '100%',
     height: 120,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#FFF9F5',
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
   },
   labubuName: {
     fontSize: 16,
@@ -1921,5 +1992,50 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 16,
     fontWeight: '500',
+  },
+  // Store Screen Styles
+  skeletonLine: {
+    height: 12,
+    backgroundColor: '#e5e7eb',
+    borderRadius: 6,
+  },
+  badgeContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 6,
+    marginBottom: 6,
+  },
+  badge: {
+    fontSize: 9,
+    fontWeight: '600',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginRight: 4,
+    marginBottom: 4,
+  },
+  seriesBadge: {
+    backgroundColor: '#eef2ff',
+    color: '#4f46e5',
+  },
+  buyButton: {
+    backgroundColor: '#111827',
+  },
+  buyButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+  clearButton: {
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 8,
+  },
+  clearButtonText: {
+    color: '#6366f1',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
