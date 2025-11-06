@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Firebase imports
 import { initializeApp } from 'firebase/app';
 import { initializeAuth, getReactNativePersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
-import { getFirestore, collection, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 // FIREBASE CONFIG - Your actual Firebase project config
@@ -1345,6 +1345,15 @@ function PhotoStudioScreen({ user, onBack, onNavigate }) {
 // Main Hub Screen
 function MainHub({ user, onLogout }) {
   const [currentScreen, setCurrentScreen] = useState('hub');
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+    const unsub = onSnapshot(doc(db, 'users', user.uid), (snap) => {
+      if (snap.exists()) setProfile(snap.data());
+    });
+    return unsub;
+  }, [user]);
 
   if (currentScreen === 'collection') {
     return (
@@ -1416,7 +1425,7 @@ function MainHub({ user, onLogout }) {
       </LinearGradient>
 
       <ScrollView style={styles.hubScroll}>
-        <Text style={styles.welcomeText}>Welcome, {user.email}!</Text>
+        <Text style={styles.welcomeText}>Welcome, {profile?.displayName || user.email}!</Text>
 
         <TouchableOpacity
           style={styles.card}
