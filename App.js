@@ -112,7 +112,7 @@ function AuthScreen() {
 }
 
 // Browse All Labubus Screen
-function BrowseScreen({ user, onBack }) {
+function BrowseScreen({ user, onBack, onNavigate }) {
   const [selectedSeries, setSelectedSeries] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
@@ -382,12 +382,13 @@ function BrowseScreen({ user, onBack }) {
           )}
         />
       )}
+      <TabBar currentScreen="browse" onNavigate={onNavigate} />
     </View>
   );
 }
 
 // Collection Screen
-function CollectionScreen({ user, onBrowse, onBack }) {
+function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
   const [userCollection, setUserCollection] = useState({ owned: [], wishlist: [], photos: {} });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('owned');
@@ -634,12 +635,13 @@ function CollectionScreen({ user, onBrowse, onBack }) {
           </View>
         </View>
       </Modal>
+      <TabBar currentScreen="collection" onNavigate={onNavigate} />
     </View>
   );
 }
 
 // Analytics Screen
-function AnalyticsScreen({ user, onBack }) {
+function AnalyticsScreen({ user, onBack, onNavigate }) {
   const [userCollection, setUserCollection] = useState({ owned: [], wishlist: [], photos: {} });
   const [loading, setLoading] = useState(true);
 
@@ -845,14 +847,20 @@ function AnalyticsScreen({ user, onBack }) {
           ))}
         </View>
       </ScrollView>
+      <TabBar currentScreen="analytics" onNavigate={onNavigate} />
     </View>
   );
 }
 
 // Profile Screen
-function ProfileScreen({ user, onBack }) {
+function ProfileScreen({ user, onBack, onNavigate }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [displayName, setDisplayName] = useState('');
+  const [bio, setBio] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -871,6 +879,14 @@ function ProfileScreen({ user, onBack }) {
     })();
   }, []);
 
+  useEffect(() => {
+    if (profile) {
+      setDisplayName(profile.displayName || user.email || '');
+      setBio(profile.bio || '');
+      setAvatarPreview(profile.avatarUrl || null);
+    }
+  }, [profile]);
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -880,6 +896,57 @@ function ProfileScreen({ user, onBack }) {
   }
 
   const stats = profile?.counters || {};
+
+  const handlePickAvatar = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'We need access to your photo library to set an avatar.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        setAvatarPreview(result.assets[0].uri);
+      }
+    } catch (e) {
+      console.error('Avatar pick error', e);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    try {
+      let avatarUrlToSave = profile?.avatarUrl || null;
+      // If preview is a local file (picked now), upload it
+      if (avatarPreview && !/^https?:\/\//.test(avatarPreview)) {
+        const response = await fetch(avatarPreview);
+        const blob = await response.blob();
+        const avatarRef = ref(storage, `users/${user.uid}/avatar.jpg`);
+        await uploadBytes(avatarRef, blob);
+        avatarUrlToSave = await getDownloadURL(avatarRef);
+      }
+      const newProfile = {
+        ...profile,
+        displayName: displayName || user.email,
+        bio: bio || '',
+        avatarUrl: avatarUrlToSave,
+      };
+      await setDoc(doc(db, 'users', user.uid), newProfile, { merge: true });
+      setProfile(newProfile);
+      setIsEditing(false);
+      Alert.alert('Saved', 'Your profile has been updated.');
+    } catch (e) {
+      console.error('Save profile error', e);
+      Alert.alert('Error', 'Failed to save profile.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -895,15 +962,49 @@ function ProfileScreen({ user, onBack }) {
         <View style={styles.sectionBubble}>
           <View style={{ alignItems: 'center' }}>
             <Image
-              source={{ uri: profile?.avatarUrl || 'https://via.placeholder.com/120/FFE8F0/FFFFFF?text=Labubu' }}
+              source={{ uri: avatarPreview || 'https://via.placeholder.com/120/FFE8F0/FFFFFF?text=Labubu' }}
               style={{ width: 96, height: 96, borderRadius: 999, backgroundColor: '#FFF9F5' }}
             />
-            <Text style={[styles.cardTitle, { marginTop: 10 }]}>
-              {profile?.displayName || user.email}
-            </Text>
-            {profile?.bio ? (
-              <Text style={styles.cardSubtitle}>{profile.bio}</Text>
-            ) : null}
+            {isEditing ? (
+              <>
+                <TouchableOpacity onPress={handlePickAvatar} style={[styles.uploadButton, { marginTop: 10 }]}>
+                  <Text style={styles.uploadButtonText}>Change Avatar</Text>
+                </TouchableOpacity>
+                <TextInput
+                  style={[styles.input, { marginTop: 12 }]}
+                  placeholder="Display name"
+                  value={displayName}
+                  onChangeText={setDisplayName}
+                />
+                <TextInput
+                  style={[styles.input, { height: 90, textAlignVertical: 'top' }]}
+                  placeholder="Bio"
+                  multiline
+                  value={bio}
+                  onChangeText={setBio}
+                />
+                <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.primaryGrad}>
+                  <TouchableOpacity onPress={handleSaveProfile} disabled={saving} style={{ paddingVertical: 12, alignItems: 'center' }}>
+                    {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryGradText}>Save Profile</Text>}
+                  </TouchableOpacity>
+                </LinearGradient>
+                <TouchableOpacity onPress={() => { setIsEditing(false); setAvatarPreview(profile?.avatarUrl || null); }} style={[styles.clearButton, { marginTop: 10 }]}>
+                  <Text style={styles.clearButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <Text style={[styles.cardTitle, { marginTop: 10 }]}>
+                  {profile?.displayName || user.email}
+                </Text>
+                {profile?.bio ? (
+                  <Text style={styles.cardSubtitle}>{profile.bio}</Text>
+                ) : null}
+                <TouchableOpacity onPress={() => setIsEditing(true)} style={[styles.uploadButton, { marginTop: 12, backgroundColor: '#FFB3D9' }]}>
+                  <Text style={styles.uploadButtonText}>Edit Profile</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
 
           <View style={styles.overviewGrid}>
@@ -928,12 +1029,14 @@ function ProfileScreen({ user, onBack }) {
           </View>
         </View>
       </ScrollView>
+
+      <TabBar currentScreen="profile" onNavigate={onNavigate} />
     </View>
   );
 }
 
 // Store Screen
-function StoreScreen({ onBack }) {
+function StoreScreen({ onBack, onNavigate }) {
   const { items, loading } = useLabubus();
   const [queryText, setQueryText] = useState('');
   const [sortBy, setSortBy] = useState('name');
@@ -1073,12 +1176,13 @@ function StoreScreen({ onBack }) {
           )}
         />
       )}
+      <TabBar currentScreen="store" onNavigate={onNavigate} />
     </View>
   );
 }
 
 // Photo Studio Screen
-function PhotoStudioScreen({ user, onBack }) {
+function PhotoStudioScreen({ user, onBack, onNavigate }) {
   const [userCollection, setUserCollection] = useState({ owned: [], wishlist: [], photos: {} });
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
@@ -1233,6 +1337,7 @@ function PhotoStudioScreen({ user, onBack }) {
           </Pressable>
         </Modal>
       )}
+      <TabBar currentScreen="photoStudio" onNavigate={onNavigate} />
     </View>
   );
 }
@@ -1247,6 +1352,7 @@ function MainHub({ user, onLogout }) {
         user={user}
         onBrowse={() => setCurrentScreen('browse')}
         onBack={() => setCurrentScreen('hub')}
+        onNavigate={(route) => setCurrentScreen(route)}
       />
     );
   }
@@ -1256,6 +1362,7 @@ function MainHub({ user, onLogout }) {
       <BrowseScreen
         user={user}
         onBack={() => setCurrentScreen('collection')}
+        onNavigate={(route) => setCurrentScreen(route)}
       />
     );
   }
@@ -1264,6 +1371,7 @@ function MainHub({ user, onLogout }) {
     return (
       <StoreScreen
         onBack={() => setCurrentScreen('hub')}
+        onNavigate={(route) => setCurrentScreen(route)}
       />
     );
   }
@@ -1273,6 +1381,7 @@ function MainHub({ user, onLogout }) {
       <PhotoStudioScreen
         user={user}
         onBack={() => setCurrentScreen('hub')}
+        onNavigate={(route) => setCurrentScreen(route)}
       />
     );
   }
@@ -1282,6 +1391,7 @@ function MainHub({ user, onLogout }) {
       <AnalyticsScreen
         user={user}
         onBack={() => setCurrentScreen('hub')}
+        onNavigate={(route) => setCurrentScreen(route)}
       />
     );
   }
@@ -1291,6 +1401,7 @@ function MainHub({ user, onLogout }) {
       <ProfileScreen
         user={user}
         onBack={() => setCurrentScreen('hub')}
+        onNavigate={(route) => setCurrentScreen(route)}
       />
     );
   }
@@ -1386,6 +1497,32 @@ export default function App() {
     <MainHub user={user} onLogout={handleLogout} />
   ) : (
     <AuthScreen />
+  );
+}
+
+// Bottom Tab Bar
+function TabBar({ currentScreen, onNavigate }) {
+  const tabs = [
+    { key: 'collection', label: '📦', title: 'Collection' },
+    { key: 'store', label: '🏪', title: 'Store' },
+    { key: 'photoStudio', label: '📸', title: 'Studio' },
+    { key: 'analytics', label: '📊', title: 'Stats' },
+    { key: 'profile', label: '👤', title: 'Profile' },
+  ];
+  return (
+    <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingBottom: 12, paddingTop: 8, backgroundColor: '#FFFFFF', borderTopWidth: 1, borderTopColor: '#FFE8F0' }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+        {tabs.map(t => {
+          const active = currentScreen === t.key;
+          return (
+            <TouchableOpacity key={t.key} onPress={() => onNavigate && onNavigate(t.key)} style={{ alignItems: 'center', padding: 6, minWidth: 60 }}>
+              <Text style={{ fontSize: 18 }}>{t.label}</Text>
+              <Text style={{ fontSize: 10, marginTop: 2, color: active ? '#FF6B9D' : '#8B8B8B', fontWeight: active ? '700' : '600' }}>{t.title}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
   );
 }
 
