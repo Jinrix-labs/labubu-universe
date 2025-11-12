@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image, FlatList, Alert, Modal, Pressable, Linking } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image, FlatList, Alert, Modal, Pressable, Linking, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import SplashIntro, { shouldShowSplash, resetSplash } from './SplashIntro';
 
 // Firebase imports
 import { initializeApp } from 'firebase/app';
@@ -260,7 +261,10 @@ function BrowseScreen({ user, onBack, onNavigate }) {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
-        <TouchableOpacity onPress={onBack}>
+        <TouchableOpacity onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onBack();
+        }}>
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Browse All Labubus</Text>
@@ -299,7 +303,10 @@ function BrowseScreen({ user, onBack, onNavigate }) {
                 styles.sortPill,
                 sortBy === option.key && styles.sortPillActive
               ]}
-              onPress={() => setSortBy(option.key)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setSortBy(option.key);
+              }}
             >
               <Text style={[
                 styles.sortPillText,
@@ -326,7 +333,10 @@ function BrowseScreen({ user, onBack, onNavigate }) {
                 styles.filterPill,
                 selectedSeries === series && styles.filterPillActive
               ]}
-              onPress={() => setSelectedSeries(series)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setSelectedSeries(series);
+              }}
             >
               <Text style={[
                 styles.filterPillText,
@@ -350,7 +360,11 @@ function BrowseScreen({ user, onBack, onNavigate }) {
       {filteredLabubus.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>No results found</Text>
-          <TouchableOpacity style={styles.clearButton} onPress={() => { setSearchQuery(''); setSelectedSeries('All'); }}>
+          <TouchableOpacity style={styles.clearButton} onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setSearchQuery('');
+            setSelectedSeries('All');
+          }}>
             <Text style={styles.clearButtonText}>Clear filters</Text>
           </TouchableOpacity>
         </View>
@@ -386,7 +400,10 @@ function BrowseScreen({ user, onBack, onNavigate }) {
                     styles.actionButton,
                     userCollection.owned.includes(item.id) && styles.actionButtonActive
                   ]}
-                  onPress={() => toggleOwned(item.id)}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    toggleOwned(item.id);
+                  }}
                 >
                   <Text style={[
                     styles.actionButtonText,
@@ -401,7 +418,10 @@ function BrowseScreen({ user, onBack, onNavigate }) {
                     styles.actionButton,
                     userCollection.wishlist.includes(item.id) && styles.actionButtonActive
                   ]}
-                  onPress={() => toggleWishlist(item.id)}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    toggleWishlist(item.id);
+                  }}
                 >
                   <Text style={[
                     styles.actionButtonText,
@@ -581,7 +601,10 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
-        <TouchableOpacity onPress={onBack}>
+        <TouchableOpacity onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onBack();
+        }}>
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Collection</Text>
@@ -592,7 +615,10 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'owned' && styles.tabActive]}
-          onPress={() => setActiveTab('owned')}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setActiveTab('owned');
+          }}
         >
           <Text style={[styles.tabText, activeTab === 'owned' && styles.tabTextActive]}>
             Owned ({ownedLabubus.length})
@@ -600,7 +626,10 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'wishlist' && styles.tabActive]}
-          onPress={() => setActiveTab('wishlist')}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setActiveTab('wishlist');
+          }}
         >
           <Text style={[styles.tabText, activeTab === 'wishlist' && styles.tabTextActive]}>
             Wishlist ({wishlistLabubus.length})
@@ -615,7 +644,10 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
               ? 'No Labubus in your collection yet!'
               : 'Your wishlist is empty!'}
           </Text>
-          <TouchableOpacity style={styles.button} onPress={onBrowse}>
+          <TouchableOpacity style={styles.button} onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            onBrowse();
+          }}>
             <Text style={styles.buttonText}>Browse All Labubus</Text>
           </TouchableOpacity>
         </View>
@@ -640,7 +672,10 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
               {activeTab === 'owned' && (
                 <TouchableOpacity
                   style={styles.uploadButton}
-                  onPress={() => handleAddPhoto(item.id)}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    handleAddPhoto(item.id);
+                  }}
                   disabled={uploadingId === item.id}
                 >
                   {uploadingId === item.id ? (
@@ -671,14 +706,20 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
 
             <TouchableOpacity
               style={styles.photoOptionButton}
-              onPress={() => takePhoto(selectedLabubuId)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                takePhoto(selectedLabubuId);
+              }}
             >
               <Text style={styles.photoOptionText}>📷 Take Photo</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.photoOptionButton}
-              onPress={() => pickImage(selectedLabubuId)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                pickImage(selectedLabubuId);
+              }}
             >
               <Text style={styles.photoOptionText}>🖼️ Choose from Library</Text>
             </TouchableOpacity>
@@ -807,7 +848,10 @@ function AnalyticsScreen({ user, onBack, onNavigate }) {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
-        <TouchableOpacity onPress={onBack}>
+        <TouchableOpacity onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onBack();
+        }}>
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Collection Analytics</Text>
@@ -915,6 +959,7 @@ function AnalyticsScreen({ user, onBack, onNavigate }) {
 // Profile Screen
 function ProfileScreen({ user, onBack, onNavigate }) {
   const [profile, setProfile] = useState(null);
+  const [userCollection, setUserCollection] = useState({ owned: [], wishlist: [], photos: {} });
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState('');
@@ -925,22 +970,58 @@ function ProfileScreen({ user, onBack, onNavigate }) {
   const [badgeToastText, setBadgeToastText] = useState('');
   const [prevBadgeCount, setPrevBadgeCount] = useState(0);
 
+  const { items: ALL_LABUBUS_PROFILE, loading: catalogLoadingProfile } = useLabubus();
+
   useEffect(() => {
-    (async () => {
+    // Load initial data first, then set up real-time listener
+    const loadInitialData = async () => {
       try {
-        const snap = await getDoc(doc(db, 'users', user.uid));
-        if (snap.exists()) {
-          setProfile(snap.data());
+        const docRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setProfile(data);
+          setUserCollection({
+            owned: data.owned || [],
+            wishlist: data.wishlist || [],
+            photos: data.photos || {}
+          });
         } else {
-          setProfile({ displayName: user.email, badges: [], counters: {} });
+          setProfile({ displayName: user.email, badges: [] });
+          setUserCollection({ owned: [], wishlist: [], photos: {} });
         }
-      } catch (e) {
-        setProfile({ displayName: user.email, badges: [], counters: {} });
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        setProfile({ displayName: user.email, badges: [] });
+        setUserCollection({ owned: [], wishlist: [], photos: {} });
       } finally {
         setLoading(false);
       }
-    })();
-  }, []);
+    };
+
+    loadInitialData();
+
+    // Set up real-time listener for updates
+    const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        setProfile(data);
+        setUserCollection({
+          owned: data.owned || [],
+          wishlist: data.wishlist || [],
+          photos: data.photos || {}
+        });
+      } else {
+        setProfile({ displayName: user.email, badges: [] });
+        setUserCollection({ owned: [], wishlist: [], photos: {} });
+      }
+    }, (error) => {
+      console.error('Error in profile listener:', error);
+    });
+
+    return unsubscribe;
+  }, [user.uid]);
 
   useEffect(() => {
     if (profile) {
@@ -959,15 +1040,42 @@ function ProfileScreen({ user, onBack, onNavigate }) {
     }
   }, [profile]);
 
-  if (loading) {
+  // Calculate stats from actual collection data
+  const calculateStats = () => {
+    // Convert IDs to strings for consistent comparison
+    const ownedIds = (userCollection.owned || []).map(id => String(id));
+    const wishlistIds = (userCollection.wishlist || []).map(id => String(id));
+    
+    const ownedLabubus = ALL_LABUBUS_PROFILE.filter(l => ownedIds.includes(String(l.id)));
+    const totalOwned = ownedLabubus.length;
+    const totalWishlist = wishlistIds.length;
+    const totalPhotos = Object.keys(userCollection.photos || {}).length;
+    
+    // Calculate collection value
+    const collectionValue = ownedLabubus.reduce((sum, labubu) => {
+      const avgValue = labubu.estimatedValue 
+        ? (labubu.estimatedValue.min + labubu.estimatedValue.max) / 2 
+        : 0;
+      return sum + avgValue;
+    }, 0);
+
+    return {
+      owned: totalOwned,
+      wishlist: totalWishlist,
+      photos: totalPhotos,
+      value: collectionValue
+    };
+  };
+
+  const stats = calculateStats();
+
+  if (loading || catalogLoadingProfile) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#6366f1" />
       </View>
     );
   }
-
-  const stats = profile?.counters || {};
 
   const handlePickAvatar = async () => {
     try {
@@ -1024,7 +1132,10 @@ function ProfileScreen({ user, onBack, onNavigate }) {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
-        <TouchableOpacity onPress={onBack}>
+        <TouchableOpacity onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onBack();
+        }}>
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
@@ -1047,7 +1158,10 @@ function ProfileScreen({ user, onBack, onNavigate }) {
             />
             {isEditing ? (
               <>
-                <TouchableOpacity onPress={handlePickAvatar} style={[styles.uploadButton, { marginTop: 10 }]}>
+                <TouchableOpacity onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  handlePickAvatar();
+                }} style={[styles.uploadButton, { marginTop: 10 }]}>
                   <Text style={styles.uploadButtonText}>Change Avatar</Text>
                 </TouchableOpacity>
                 <TextInput
@@ -1068,7 +1182,11 @@ function ProfileScreen({ user, onBack, onNavigate }) {
                     {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryGradText}>Save Profile</Text>}
                   </TouchableOpacity>
                 </LinearGradient>
-                <TouchableOpacity onPress={() => { setIsEditing(false); setAvatarPreview(profile?.avatarUrl || null); }} style={[styles.clearButton, { marginTop: 10 }]}>
+                <TouchableOpacity onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setIsEditing(false);
+                  setAvatarPreview(profile?.avatarUrl || null);
+                }} style={[styles.clearButton, { marginTop: 10 }]}>
                   <Text style={styles.clearButtonText}>Cancel</Text>
                 </TouchableOpacity>
               </>
@@ -1080,7 +1198,10 @@ function ProfileScreen({ user, onBack, onNavigate }) {
                 {profile?.bio ? (
                   <Text style={styles.cardSubtitle}>{profile.bio}</Text>
                 ) : null}
-                <TouchableOpacity onPress={() => setIsEditing(true)} style={[styles.uploadButton, { marginTop: 12, backgroundColor: '#FFB3D9' }]}>
+                <TouchableOpacity onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setIsEditing(true);
+                }} style={[styles.uploadButton, { marginTop: 12, backgroundColor: '#FFB3D9' }]}>
                   <Text style={styles.uploadButtonText}>Edit Profile</Text>
                 </TouchableOpacity>
               </>
@@ -1146,7 +1267,10 @@ function StoreScreen({ onBack, onNavigate }) {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
-        <TouchableOpacity onPress={onBack}>
+        <TouchableOpacity onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onBack();
+        }}>
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Store</Text>
@@ -1174,7 +1298,10 @@ function StoreScreen({ onBack, onNavigate }) {
             <TouchableOpacity
               key={opt.key}
               style={[styles.sortPill, sortBy === opt.key && styles.sortPillActive]}
-              onPress={() => setSortBy(opt.key)}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setSortBy(opt.key);
+              }}
             >
               <Text style={[styles.sortPillText, sortBy === opt.key && styles.sortPillTextActive]}>
                 {opt.label}
@@ -1246,7 +1373,10 @@ function StoreScreen({ onBack, onNavigate }) {
               <View style={styles.buttonRow}>
                 <TouchableOpacity
                   style={[styles.actionButton, styles.buyButton]}
-                  onPress={() => item.storeLinks?.popmart && Linking.openURL(item.storeLinks.popmart)}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    item.storeLinks?.popmart && Linking.openURL(item.storeLinks.popmart);
+                  }}
                   disabled={!item.storeLinks?.popmart}
                 >
                   <Text style={[styles.actionButtonText, styles.buyButtonText]}>🛒 Buy</Text>
@@ -1341,7 +1471,10 @@ function PhotoStudioScreen({ user, onBack, onNavigate }) {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
-        <TouchableOpacity onPress={onBack}>
+        <TouchableOpacity onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onBack();
+        }}>
           <Text style={styles.backButton}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Photo Studio</Text>
@@ -1364,7 +1497,10 @@ function PhotoStudioScreen({ user, onBack, onNavigate }) {
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.photoCard}
-                onPress={() => setSelectedPhoto(item)}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setSelectedPhoto(item);
+                }}
               >
                 <Image source={{ uri: item.photoUrl }} style={styles.photoImage} />
                 <View style={styles.photoInfo}>
@@ -1387,7 +1523,10 @@ function PhotoStudioScreen({ user, onBack, onNavigate }) {
         >
           <Pressable
             style={styles.modalOverlay}
-            onPress={() => setSelectedPhoto(null)}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setSelectedPhoto(null);
+            }}
           >
             <View style={styles.modalContent}>
               <Image
@@ -1402,13 +1541,19 @@ function PhotoStudioScreen({ user, onBack, onNavigate }) {
               <View style={styles.modalButtons}>
                 <TouchableOpacity
                   style={[styles.modalButton, styles.deleteButton]}
-                  onPress={() => handleDeletePhoto(selectedPhoto.labubuId)}
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    handleDeletePhoto(selectedPhoto.labubuId);
+                  }}
                 >
                   <Text style={styles.modalButtonText}>Delete Photo</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.modalButton, styles.closeButton]}
-                  onPress={() => setSelectedPhoto(null)}
+                  onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setSelectedPhoto(null);
+            }}
                 >
                   <Text style={styles.modalButtonText}>Close</Text>
                 </TouchableOpacity>
@@ -1509,7 +1654,10 @@ function MainHub({ user, onLogout }) {
 
         <TouchableOpacity
           style={styles.card}
-          onPress={() => setCurrentScreen('profile')}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setCurrentScreen('profile');
+          }}
         >
           <Text style={styles.cardTitle}>👤 Profile</Text>
           <Text style={styles.cardSubtitle}>Your stats and badges</Text>
@@ -1517,7 +1665,10 @@ function MainHub({ user, onLogout }) {
 
         <TouchableOpacity
           style={styles.card}
-          onPress={() => setCurrentScreen('collection')}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setCurrentScreen('collection');
+          }}
         >
           <Text style={styles.cardTitle}>✨ My Labubu Family</Text>
           <Text style={styles.cardSubtitle}>View and manage your Labubus</Text>
@@ -1525,7 +1676,10 @@ function MainHub({ user, onLogout }) {
 
         <TouchableOpacity
           style={styles.card}
-          onPress={() => setCurrentScreen('store')}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setCurrentScreen('store');
+          }}
         >
           <Text style={styles.cardTitle}>🛍️ Get More Labubus!</Text>
           <Text style={styles.cardSubtitle}>Browse and buy</Text>
@@ -1533,7 +1687,10 @@ function MainHub({ user, onLogout }) {
 
         <TouchableOpacity
           style={styles.card}
-          onPress={() => setCurrentScreen('photoStudio')}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setCurrentScreen('photoStudio');
+          }}
         >
           <Text style={styles.cardTitle}>📷 Memory Gallery</Text>
           <Text style={styles.cardSubtitle}>View all your Labubu photos</Text>
@@ -1541,7 +1698,10 @@ function MainHub({ user, onLogout }) {
 
         <TouchableOpacity
           style={styles.card}
-          onPress={() => setCurrentScreen('analytics')}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setCurrentScreen('analytics');
+          }}
         >
           <Text style={styles.cardTitle}>✨ Collection Journey</Text>
           <Text style={styles.cardSubtitle}>Collection stats and insights</Text>
@@ -1560,19 +1720,60 @@ function MainHub({ user, onLogout }) {
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
+  const [checkingSplash, setCheckingSplash] = useState(true);
+  const [fadeAnim] = useState(new Animated.Value(0));
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-
-    return unsubscribe;
+    checkSplashStatus();
   }, []);
+
+  const checkSplashStatus = async () => {
+    const shouldShow = await shouldShowSplash();
+    setShowSplash(shouldShow);
+    setCheckingSplash(false);
+  };
+
+  useEffect(() => {
+    if (!checkingSplash && !showSplash) {
+      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+        setLoading(false);
+      });
+      return unsubscribe;
+    }
+  }, [checkingSplash, showSplash]);
+
+  useEffect(() => {
+    if (!showSplash && !loading) {
+      // Fade in the main content
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showSplash, loading]);
 
   const handleLogout = async () => {
     await signOut(auth);
   };
+
+  // Show splash on first launch
+  if (checkingSplash) {
+    return null; // Or a simple loading indicator
+  }
+
+  if (showSplash) {
+    return (
+      <SplashIntro 
+        onComplete={() => {
+          setShowSplash(false);
+        }} 
+      />
+    );
+  }
 
   if (loading) {
     return (
@@ -1582,10 +1783,14 @@ export default function App() {
     );
   }
 
-  return user ? (
-    <MainHub user={user} onLogout={handleLogout} />
-  ) : (
-    <AuthScreen />
+  return (
+    <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+      {user ? (
+        <MainHub user={user} onLogout={handleLogout} />
+      ) : (
+        <AuthScreen />
+      )}
+    </Animated.View>
   );
 }
 
@@ -1604,7 +1809,14 @@ function TabBar({ currentScreen, onNavigate }) {
         {tabs.map(t => {
           const active = currentScreen === t.key;
           return (
-            <TouchableOpacity key={t.key} onPress={() => onNavigate && onNavigate(t.key)} style={{ alignItems: 'center', padding: 6, minWidth: 60 }}>
+            <TouchableOpacity 
+              key={t.key} 
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onNavigate && onNavigate(t.key);
+              }} 
+              style={{ alignItems: 'center', padding: 6, minWidth: 60 }}
+            >
               <Text style={{ fontSize: 18 }}>{t.label}</Text>
               <Text style={{ fontSize: 10, marginTop: 2, color: active ? '#FF6B9D' : '#8B8B8B', fontWeight: active ? '700' : '600' }}>{t.title}</Text>
             </TouchableOpacity>
@@ -1685,8 +1897,9 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: '#333',
+    letterSpacing: 0.3,
   },
   backButton: {
     fontSize: 16,
@@ -1712,12 +1925,12 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',
     padding: 24,
-    borderRadius: 20,
+    borderRadius: 22,
     marginBottom: 16,
     shadowColor: '#FFB3D9',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
     elevation: 4,
     borderWidth: 1,
     borderColor: '#FFE8F0',
@@ -1725,22 +1938,24 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 20,
     fontWeight: '600',
-    marginBottom: 5,
+    marginBottom: 6,
     color: '#333',
+    letterSpacing: 0.2,
   },
   cardSubtitle: {
     fontSize: 14,
     color: '#999',
+    lineHeight: 20,
   },
   sectionBubble: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 20,
+    borderRadius: 20,
+    padding: 22,
     marginBottom: 16,
     shadowColor: '#FFB3D9',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.12,
-    shadowRadius: 8,
+    shadowRadius: 10,
     elevation: 3,
     borderWidth: 1,
     borderColor: '#FFE8F0',
@@ -1753,13 +1968,13 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ddd',
   },
   searchInput: {
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 25,
+    backgroundColor: '#FFF9F5',
+    paddingHorizontal: 18,
+    paddingVertical: 13,
+    borderRadius: 26,
     fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    borderWidth: 1.5,
+    borderColor: '#FFE8F0',
   },
   sortWrapper: {
     backgroundColor: '#fff',
@@ -1780,11 +1995,13 @@ const styles = StyleSheet.create({
     paddingRight: 15,
   },
   sortPill: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    borderRadius: 22,
+    backgroundColor: '#FFF5F8',
     marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#FFE8F0',
   },
   sortPillActive: {
     backgroundColor: '#6366f1',
@@ -1820,11 +2037,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   filterPill: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 22,
+    paddingVertical: 11,
+    borderRadius: 22,
+    backgroundColor: '#FFF5F8',
     marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#FFE8F0',
   },
   filterPillActive: {
     backgroundColor: '#6366f1',
@@ -1842,16 +2061,18 @@ const styles = StyleSheet.create({
   },
   labubuCard: {
     flex: 1,
-    margin: 5,
+    margin: 6,
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowColor: '#FFB3D9',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
     elevation: 3,
     maxWidth: '48%',
+    borderWidth: 1,
+    borderColor: '#FFF0F5',
   },
   labubuInfo: {
     padding: 12,
@@ -1929,11 +2150,13 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    padding: 8,
-    borderRadius: 6,
-    backgroundColor: '#f5f5f5',
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: '#FFF5F8',
     marginHorizontal: 2,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FFE8F0',
   },
   actionButtonActive: {
     backgroundColor: '#6366f1',
@@ -1982,11 +2205,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   uploadButton: {
-    backgroundColor: '#10b981',
-    padding: 8,
-    borderRadius: 6,
+    backgroundColor: '#FFB3D9',
+    padding: 10,
+    borderRadius: 14,
     marginTop: 5,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FF9BC8',
   },
   uploadButtonText: {
     color: '#fff',
