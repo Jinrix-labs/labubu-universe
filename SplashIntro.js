@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Animated } from 'react-native';
-import { Video, ResizeMode } from 'expo-av';
+import { VideoView, useVideoPlayer } from 'expo-video';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SPLASH_SHOWN_KEY = '@splash_intro_shown';
 
 export default function SplashIntro({ onComplete }) {
-  const videoRef = useRef(null);
   const [showSkip, setShowSkip] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [hasVideoSource, setHasVideoSource] = useState(true);
@@ -18,7 +17,6 @@ export default function SplashIntro({ onComplete }) {
     videoSource = require('./assets/videos/splash-intro.mp4');
   } catch (error) {
     console.warn('Video file not found:', error);
-    // Set state in useEffect to avoid calling setState during render
   }
 
   const fadeOutAndComplete = useCallback(() => {
@@ -31,11 +29,9 @@ export default function SplashIntro({ onComplete }) {
       // Call onComplete after fade completes
       onComplete();
     });
-    // fadeAnim is a ref (stable), so we only need onComplete in deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onComplete]);
 
-  const handleVideoEnd = async () => {
+  const handleVideoEnd = useCallback(async () => {
     // Mark splash as shown
     try {
       await AsyncStorage.setItem(SPLASH_SHOWN_KEY, 'true');
@@ -44,13 +40,17 @@ export default function SplashIntro({ onComplete }) {
     }
     // Start fade out animation
     fadeOutAndComplete();
-  };
+  }, [fadeOutAndComplete]);
+
+  // Create video player with expo-video
+  const player = useVideoPlayer(videoSource || null);
+
 
   const handleSkip = async () => {
     // Stop video and mark as shown
     try {
-      if (videoRef.current) {
-        await videoRef.current.stopAsync();
+      if (player) {
+        player.pause();
       }
       await AsyncStorage.setItem(SPLASH_SHOWN_KEY, 'true');
     } catch (error) {
@@ -69,18 +69,33 @@ export default function SplashIntro({ onComplete }) {
     }, 1000);
   };
 
+  // Set up video player
   useEffect(() => {
-    // Check if video source exists
     if (!videoSource) {
       setHasVideoSource(false);
-      // If no video source, skip immediately with fade
       const timer = setTimeout(() => {
         fadeOutAndComplete();
       }, 500);
       return () => clearTimeout(timer);
     }
 
-    // Show skip button after 2 seconds (gives users time to enjoy it)
+    if (player && videoSource) {
+      player.loop = false;
+      player.play();
+
+      // Listen for playback end
+      const subscription = player.addListener('playToEnd', () => {
+        handleVideoEnd();
+      });
+
+      return () => {
+        subscription.remove();
+      };
+    }
+  }, [player, videoSource, handleVideoEnd, fadeOutAndComplete]);
+
+  useEffect(() => {
+    // Show skip button after 2 seconds
     const skipTimer = setTimeout(() => {
       setShowSkip(true);
     }, 2000);
@@ -95,7 +110,6 @@ export default function SplashIntro({ onComplete }) {
       clearTimeout(skipTimer);
       clearTimeout(timeoutTimer);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fadeOutAndComplete]);
 
   // If video error occurred or no video source, show fallback
@@ -116,29 +130,13 @@ export default function SplashIntro({ onComplete }) {
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-      <Video
-        ref={videoRef}
-        source={videoSource}
-        // TESTING: Swap between your two versions here:
-        // source={require('./assets/videos/splash-v1.mp4')}
-        // source={require('./assets/videos/splash-v2.mp4')}
+      <VideoView
+        player={player}
         style={styles.video}
-        resizeMode={ResizeMode.COVER}
-        shouldPlay
-        isLooping={false}
+        contentFit="cover"
+        nativeControls={false}
+        allowsFullscreen={false}
         onError={handleVideoError}
-        onPlaybackStatusUpdate={(status) => {
-          if (!status) return;
-          
-          if (status.error) {
-            handleVideoError(status.error);
-            return;
-          }
-          
-          if (status.didJustFinish) {
-            handleVideoEnd();
-          }
-        }}
       />
       
       {showSkip && (

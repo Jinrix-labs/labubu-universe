@@ -87,7 +87,7 @@ function AuthScreen() {
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.primaryGrad}>
+          <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.primaryGrad}>
             <TouchableOpacity
               onPress={handleAuth}
               disabled={loading}
@@ -260,7 +260,7 @@ function BrowseScreen({ user, onBack, onNavigate }) {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
         <TouchableOpacity onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onBack();
@@ -600,7 +600,7 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
         <TouchableOpacity onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onBack();
@@ -847,7 +847,7 @@ function AnalyticsScreen({ user, onBack, onNavigate }) {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
         <TouchableOpacity onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onBack();
@@ -978,7 +978,7 @@ function ProfileScreen({ user, onBack, onNavigate }) {
       try {
         const docRef = doc(db, 'users', user.uid);
         const docSnap = await getDoc(docRef);
-        
+
         if (docSnap.exists()) {
           const data = docSnap.data();
           setProfile(data);
@@ -1045,16 +1045,16 @@ function ProfileScreen({ user, onBack, onNavigate }) {
     // Convert IDs to strings for consistent comparison
     const ownedIds = (userCollection.owned || []).map(id => String(id));
     const wishlistIds = (userCollection.wishlist || []).map(id => String(id));
-    
+
     const ownedLabubus = ALL_LABUBUS_PROFILE.filter(l => ownedIds.includes(String(l.id)));
     const totalOwned = ownedLabubus.length;
     const totalWishlist = wishlistIds.length;
     const totalPhotos = Object.keys(userCollection.photos || {}).length;
-    
+
     // Calculate collection value
     const collectionValue = ownedLabubus.reduce((sum, labubu) => {
-      const avgValue = labubu.estimatedValue 
-        ? (labubu.estimatedValue.min + labubu.estimatedValue.max) / 2 
+      const avgValue = labubu.estimatedValue
+        ? (labubu.estimatedValue.min + labubu.estimatedValue.max) / 2
         : 0;
       return sum + avgValue;
     }, 0);
@@ -1129,9 +1129,23 @@ function ProfileScreen({ user, onBack, onNavigate }) {
     }
   };
 
+  const handleResetSplash = async () => {
+    try {
+      await resetSplash();
+      Alert.alert(
+        'Splash Reset',
+        'Splash screen has been reset. Please restart the app to see it again.',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Error resetting splash:', error);
+      Alert.alert('Error', 'Failed to reset splash screen');
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
         <TouchableOpacity onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onBack();
@@ -1177,7 +1191,7 @@ function ProfileScreen({ user, onBack, onNavigate }) {
                   value={bio}
                   onChangeText={setBio}
                 />
-                <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.primaryGrad}>
+                <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.primaryGrad}>
                   <TouchableOpacity onPress={handleSaveProfile} disabled={saving} style={{ paddingVertical: 12, alignItems: 'center' }}>
                     {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryGradText}>Save Profile</Text>}
                   </TouchableOpacity>
@@ -1229,6 +1243,24 @@ function ProfileScreen({ user, onBack, onNavigate }) {
             )}
           </View>
         </View>
+
+        {/* TESTING: Reset Splash Screen Button - REMOVE AFTER TESTING */}
+        <View style={styles.sectionBubble}>
+          <Text style={styles.sectionTitle}>Testing</Text>
+          <TouchableOpacity
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              handleResetSplash();
+            }}
+            style={[styles.uploadButton, { backgroundColor: '#FF6B9D', marginTop: 10 }]}
+          >
+            <Text style={styles.uploadButtonText}>🔄 Reset Splash Screen (Testing)</Text>
+          </TouchableOpacity>
+          <Text style={[styles.cardSubtitle, { marginTop: 8, fontSize: 12 }]}>
+            Tap to reset splash screen. Restart app to see it again.
+          </Text>
+        </View>
+        {/* END TESTING SECTION */}
       </ScrollView>
 
       <TabBar currentScreen="profile" onNavigate={onNavigate} />
@@ -1266,7 +1298,7 @@ function StoreScreen({ onBack, onNavigate }) {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
         <TouchableOpacity onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onBack();
@@ -1470,7 +1502,7 @@ function PhotoStudioScreen({ user, onBack, onNavigate }) {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
         <TouchableOpacity onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onBack();
@@ -1551,9 +1583,9 @@ function PhotoStudioScreen({ user, onBack, onNavigate }) {
                 <TouchableOpacity
                   style={[styles.modalButton, styles.closeButton]}
                   onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setSelectedPhoto(null);
-            }}
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setSelectedPhoto(null);
+                  }}
                 >
                   <Text style={styles.modalButtonText}>Close</Text>
                 </TouchableOpacity>
@@ -1642,7 +1674,7 @@ function MainHub({ user, onLogout }) {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.header}>
+      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
         <Text style={styles.headerTitle}>Labubu Universe</Text>
         <TouchableOpacity onPress={onLogout} style={styles.logoutButton}>
           <Text style={styles.logoutText}>Logout</Text>
@@ -1767,10 +1799,10 @@ export default function App() {
 
   if (showSplash) {
     return (
-      <SplashIntro 
+      <SplashIntro
         onComplete={() => {
           setShowSplash(false);
-        }} 
+        }}
       />
     );
   }
@@ -1809,12 +1841,12 @@ function TabBar({ currentScreen, onNavigate }) {
         {tabs.map(t => {
           const active = currentScreen === t.key;
           return (
-            <TouchableOpacity 
-              key={t.key} 
+            <TouchableOpacity
+              key={t.key}
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                 onNavigate && onNavigate(t.key);
-              }} 
+              }}
               style={{ alignItems: 'center', padding: 6, minWidth: 60 }}
             >
               <Text style={{ fontSize: 18 }}>{t.label}</Text>
