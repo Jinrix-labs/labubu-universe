@@ -5,7 +5,9 @@ import * as Haptics from 'expo-haptics';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import SplashIntro, { shouldShowSplash, resetSplash } from './SplashIntro';
+import SplashIntro, { shouldShowSplash } from './SplashIntro';
+import { PremiumProvider, usePremium } from './PremiumContext';
+import PaywallScreen from './PaywallScreen';
 
 // Firebase imports
 import { initializeApp } from 'firebase/app';
@@ -124,6 +126,8 @@ function BrowseScreen({ user, onBack, onNavigate }) {
   const { items: ALL_LABUBUS, seriesOptions: SERIES_OPTIONS_REMOTE, loading: catalogLoading } = useLabubus();
   const [showConfetti, setShowConfetti] = useState(false);
   const [confettiKey, setConfettiKey] = useState(0);
+  const { isPremium } = usePremium();
+  const [showPaywall, setShowPaywall] = useState(false);
 
   useEffect(() => {
     loadUserCollection();
@@ -157,6 +161,12 @@ function BrowseScreen({ user, onBack, onNavigate }) {
   };
 
   const toggleOwned = async (labubuId) => {
+    // Check if free user is at limit
+    if (!isPremium && userCollection.owned.length >= 15 && !userCollection.owned.includes(labubuId)) {
+      setShowPaywall(true);
+      return;
+    }
+
     const wasOwned = userCollection.owned.includes(labubuId);
     const newOwned = wasOwned
       ? userCollection.owned.filter(id => id !== labubuId)
@@ -438,6 +448,11 @@ function BrowseScreen({ user, onBack, onNavigate }) {
       {showConfetti && (
         <ConfettiCannon key={confettiKey} count={60} origin={{ x: 0, y: 0 }} fadeOut />
       )}
+      {showPaywall && (
+        <Modal visible={true} animationType="slide">
+          <PaywallScreen onClose={() => setShowPaywall(false)} />
+        </Modal>
+      )}
       <TabBar currentScreen="browse" onNavigate={onNavigate} />
     </View>
   );
@@ -477,6 +492,18 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
     // Show modal with options: Take Photo or Choose from Library
     setSelectedLabubuId(labubuId);
     setShowPhotoOptions(true);
+  };
+
+  const handleTakePhoto = () => {
+    if (selectedLabubuId) {
+      takePhoto(selectedLabubuId);
+    }
+  };
+
+  const handleChooseFromLibrary = () => {
+    if (selectedLabubuId) {
+      pickImage(selectedLabubuId);
+    }
   };
 
   const takePhoto = async (labubuId) => {
@@ -600,7 +627,12 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#FFB3D9', '#C9B8FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
+      <LinearGradient
+        colors={['#FFB3D9', '#C9B8FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.header}
+      >
         <TouchableOpacity onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           onBack();
@@ -644,12 +676,9 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
               ? 'No Labubus in your collection yet!'
               : 'Your wishlist is empty!'}
           </Text>
-          <TouchableOpacity style={styles.button} onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            onBrowse();
-          }}>
-            <Text style={styles.buttonText}>Browse All Labubus</Text>
-          </TouchableOpacity>
+          <Text style={styles.emptySubtext}>
+            Tap the + button to browse all Labubus
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -692,47 +721,70 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
         />
       )}
 
-      {/* Photo Options Modal */}
-      <Modal
-        visible={showPhotoOptions}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowPhotoOptions(false)}
+      {/* Floating Action Button - ALWAYS VISIBLE */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onBrowse();
+        }}
+        activeOpacity={0.8}
       >
-        <View style={styles.photoOptionsOverlay}>
-          <View style={styles.photoOptionsModal}>
-            <Text style={styles.photoOptionsTitle}>Add Photo</Text>
-            <Text style={styles.photoOptionsSubtitle}>Choose an option</Text>
+        <LinearGradient
+          colors={['#FFB3D9', '#C9B8FF']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.fabGradient}
+        >
+          <Text style={styles.fabIcon}>+</Text>
+        </LinearGradient>
+      </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.photoOptionButton}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                takePhoto(selectedLabubuId);
-              }}
-            >
-              <Text style={styles.photoOptionText}>📷 Take Photo</Text>
-            </TouchableOpacity>
+      {/* Photo Options Modal */}
+      {showPhotoOptions && (
+        <Modal
+          visible={true}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowPhotoOptions(false)}
+        >
+          <Pressable 
+            style={styles.photoModalOverlay}
+            onPress={() => setShowPhotoOptions(false)}
+          >
+            <View style={styles.photoModalContent}>
+              <Text style={styles.photoOptionsTitle}>Add Photo</Text>
+              
+              <TouchableOpacity
+                style={styles.photoOptionButton}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  handleTakePhoto();
+                }}
+              >
+                <Text style={styles.photoOptionText}>📷 Take Photo</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.photoOptionButton}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                pickImage(selectedLabubuId);
-              }}
-            >
-              <Text style={styles.photoOptionText}>🖼️ Choose from Library</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.photoOptionButton}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  handleChooseFromLibrary();
+                }}
+              >
+                <Text style={styles.photoOptionText}>🖼️ Choose from Library</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.photoOptionCancel}
-              onPress={() => setShowPhotoOptions(false)}
-            >
-              <Text style={styles.photoOptionCancelText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+              <TouchableOpacity
+                style={[styles.photoOptionButton, styles.cancelButton]}
+                onPress={() => setShowPhotoOptions(false)}
+              >
+                <Text style={styles.photoOptionText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Modal>
+      )}
       {showConfetti && (
         <ConfettiCannon key={confettiKey} count={60} origin={{ x: 0, y: 0 }} fadeOut />
       )}
@@ -1129,19 +1181,6 @@ function ProfileScreen({ user, onBack, onNavigate }) {
     }
   };
 
-  const handleResetSplash = async () => {
-    try {
-      await resetSplash();
-      Alert.alert(
-        'Splash Reset',
-        'Splash screen has been reset. Please restart the app to see it again.',
-        [{ text: 'OK' }]
-      );
-    } catch (error) {
-      console.error('Error resetting splash:', error);
-      Alert.alert('Error', 'Failed to reset splash screen');
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -1243,24 +1282,6 @@ function ProfileScreen({ user, onBack, onNavigate }) {
             )}
           </View>
         </View>
-
-        {/* TESTING: Reset Splash Screen Button - REMOVE AFTER TESTING */}
-        <View style={styles.sectionBubble}>
-          <Text style={styles.sectionTitle}>Testing</Text>
-          <TouchableOpacity
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              handleResetSplash();
-            }}
-            style={[styles.uploadButton, { backgroundColor: '#FF6B9D', marginTop: 10 }]}
-          >
-            <Text style={styles.uploadButtonText}>🔄 Reset Splash Screen (Testing)</Text>
-          </TouchableOpacity>
-          <Text style={[styles.cardSubtitle, { marginTop: 8, fontSize: 12 }]}>
-            Tap to reset splash screen. Restart app to see it again.
-          </Text>
-        </View>
-        {/* END TESTING SECTION */}
       </ScrollView>
 
       <TabBar currentScreen="profile" onNavigate={onNavigate} />
@@ -1816,13 +1837,15 @@ export default function App() {
   }
 
   return (
-    <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-      {user ? (
-        <MainHub user={user} onLogout={handleLogout} />
-      ) : (
-        <AuthScreen />
-      )}
-    </Animated.View>
+    <PremiumProvider>
+      <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+        {user ? (
+          <MainHub user={user} onLogout={handleLogout} />
+        ) : (
+          <AuthScreen />
+        )}
+      </Animated.View>
+    </PremiumProvider>
   );
 }
 
@@ -1836,7 +1859,7 @@ function TabBar({ currentScreen, onNavigate }) {
     { key: 'profile', label: '👤', title: 'Profile' },
   ];
   return (
-    <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingBottom: 12, paddingTop: 8, backgroundColor: '#FFFFFF', borderTopWidth: 1, borderTopColor: '#FFE8F0' }}>
+    <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingBottom: 12, paddingTop: 8, backgroundColor: '#FFF5F8', borderTopWidth: 1, borderTopColor: '#FFE8F0' }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
         {tabs.map(t => {
           const active = currentScreen === t.key;
@@ -1887,7 +1910,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF5F8',
     padding: 15,
     borderRadius: 8,
     marginBottom: 15,
@@ -1954,7 +1977,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFF5F8',
     padding: 24,
     borderRadius: 22,
     marginBottom: 16,
@@ -1979,7 +2002,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   sectionBubble: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFF5F8',
     borderRadius: 20,
     padding: 22,
     marginBottom: 16,
@@ -1992,7 +2015,7 @@ const styles = StyleSheet.create({
     borderColor: '#FFE8F0',
   },
   searchWrapper: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF5F8',
     paddingHorizontal: 15,
     paddingVertical: 12,
     borderBottomWidth: 1,
@@ -2008,7 +2031,7 @@ const styles = StyleSheet.create({
     borderColor: '#FFE8F0',
   },
   sortWrapper: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF5F8',
     paddingVertical: 12,
     paddingLeft: 15,
     borderBottomWidth: 1,
@@ -2047,7 +2070,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   filterWrapper: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF5F8',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
     paddingVertical: 12,
@@ -2093,17 +2116,17 @@ const styles = StyleSheet.create({
   labubuCard: {
     flex: 1,
     margin: 6,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#FFB3D9',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
     maxWidth: '48%',
-    borderWidth: 1,
-    borderColor: '#FFF0F5',
+    borderWidth: 1.5,
+    borderColor: '#FFE8F0',
   },
   labubuInfo: {
     padding: 12,
@@ -2202,7 +2225,7 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF5F8',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
@@ -2265,7 +2288,7 @@ const styles = StyleSheet.create({
   photoCard: {
     flex: 1,
     margin: 5,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF5F8',
     borderRadius: 12,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -2364,7 +2387,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   statCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF5F8',
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
@@ -2388,7 +2411,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   section: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF5F8',
     borderRadius: 12,
     padding: 20,
     marginBottom: 20,
@@ -2542,7 +2565,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   photoOptionsModal: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF5F8',
     borderRadius: 16,
     padding: 24,
     width: '100%',
@@ -2632,5 +2655,55 @@ const styles = StyleSheet.create({
     color: '#6366f1',
     fontSize: 14,
     fontWeight: '600',
+  },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 30,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    shadowColor: '#FFB3D9',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
+    zIndex: 999,
+  },
+  fabGradient: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fabIcon: {
+    fontSize: 32,
+    color: '#FFFFFF',
+    fontWeight: '300',
+    lineHeight: 32,
+  },
+  photoModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  photoModalContent: {
+    backgroundColor: '#FFF5F8',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 300,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  cancelButton: {
+    backgroundColor: '#f3f4f6',
+    marginTop: 8,
   },
 });
