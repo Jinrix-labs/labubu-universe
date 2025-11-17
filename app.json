@@ -16,8 +16,10 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSCameraUsageDescription": "This app needs access to camera to take photos of your Labubu collection.",
-        "NSPhotoLibraryUsageDescription": "This app needs access to photo library to select photos for your Labubu collection."
-      }
+        "NSPhotoLibraryUsageDescription": "This app needs access to photo library to select photos for your Labubu collection.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "io.jinrix.labubuuniverse"
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +31,8 @@
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -43,6 +46,11 @@
           "cameraPermission": "The app accesses your camera to let you take photos of your Labubu collection."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "0a4c4601-d4b3-4a10-a8a0-c78c8945f80b"
+      }
+    }
   }
 }
