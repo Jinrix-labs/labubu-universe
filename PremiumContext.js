@@ -1,10 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Platform, Alert } from 'react-native';
 
-// Temporarily disable Purchases import to avoid NativeEventEmitter error
-// TODO: Re-enable after rebuilding native app with proper linking
+// RevenueCat Purchases - Enabled for native builds
 let Purchases = null;
-const ENABLE_PURCHASES = false; // Set to true after native rebuild
+const ENABLE_PURCHASES = true; // Enabled - ready for native build
 
 if (ENABLE_PURCHASES) {
   try {

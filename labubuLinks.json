@@ -13,7 +13,8 @@
             "Zimomo",
             "Tycoco"
         ],
-        "description": "Comprehensive Labubu dataset with added store_link field for Pop Mart official/resale URLs. Links focus on direct purchases where available; blind box series link to full sets. Sourced from popmart.com (US/AU/global) up to Oct 2025."
+        "description": "Comprehensive Labubu dataset with updated store_link fields from latest JSON data",
+        "last_updated": "2025-11-20"
     },
     "figures": [
         {
@@ -23,11 +24,11 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Pink macaron variant with soft fur",
-            "release_date": "2023-06-01",
-            "retail_price_usd": 12.90,
-            "estimated_value_usd": 15.00,
-            "store_link": "https://www.popmart.com/us/pop-now/set/40"
+            "description": "Pink macaron flavor",
+            "release_date": "2023-10-01",
+            "retail_price_usd": 12.9,
+            "estimated_value_usd": 45,
+            "store_link": "https://www.popmart.com/us/products/the-monsters-exciting-macaron-series"
         },
         {
             "id": 2,
@@ -36,11 +37,11 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Grey macaron variant with nutty details",
-            "release_date": "2023-06-01",
-            "retail_price_usd": 12.90,
-            "estimated_value_usd": 14.50,
-            "store_link": "https://www.popmart.com/us/pop-now/set/40"
+            "description": "Black sesame flavor",
+            "release_date": "2023-10-01",
+            "retail_price_usd": 12.9,
+            "estimated_value_usd": 40,
+            "store_link": "https://www.popmart.com/us/products/the-monsters-exciting-macaron-series"
         },
         {
             "id": 3,
@@ -49,11 +50,11 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Green macaron with fruity accents",
-            "release_date": "2023-06-01",
-            "retail_price_usd": 12.90,
-            "estimated_value_usd": 15.50,
-            "store_link": "https://www.popmart.com/us/pop-now/set/40"
+            "description": "Green grape flavor",
+            "release_date": "2023-10-01",
+            "retail_price_usd": 12.9,
+            "estimated_value_usd": 38,
+            "store_link": "https://www.popmart.com/us/products/the-monsters-exciting-macaron-series"
         },
         {
             "id": 4,
@@ -62,11 +63,11 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Creamy white macaron variant",
-            "release_date": "2023-06-01",
-            "retail_price_usd": 12.90,
-            "estimated_value_usd": 14.00,
-            "store_link": "https://www.popmart.com/us/pop-now/set/40"
+            "description": "Soy milk flavor",
+            "release_date": "2023-10-01",
+            "retail_price_usd": 12.9,
+            "estimated_value_usd": 50,
+            "store_link": "https://www.popmart.com/us/products/the-monsters-exciting-macaron-series"
         },
         {
             "id": 5,
@@ -75,11 +76,11 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Blue macaron with tropical vibe",
-            "release_date": "2023-06-01",
-            "retail_price_usd": 12.90,
-            "estimated_value_usd": 16.00,
-            "store_link": "https://www.popmart.com/us/pop-now/set/40"
+            "description": "Sea salt coconut flavor",
+            "release_date": "2023-10-01",
+            "retail_price_usd": 12.9,
+            "estimated_value_usd": 42,
+            "store_link": "https://www.popmart.com/us/products/the-monsters-exciting-macaron-series"
         },
         {
             "id": 6,
@@ -88,11 +89,11 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Light brown macaron with sweet details",
-            "release_date": "2023-06-01",
-            "retail_price_usd": 12.90,
-            "estimated_value_usd": 15.00,
-            "store_link": "https://www.popmart.com/us/pop-now/set/40"
+            "description": "Toffee flavor",
+            "release_date": "2023-10-01",
+            "retail_price_usd": 12.9,
+            "estimated_value_usd": 38,
+            "store_link": "https://www.popmart.com/us/products/the-monsters-exciting-macaron-series"
         },
         {
             "id": 7,
@@ -101,11 +102,11 @@
             "rarity": "secret",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Rich brown secret variant",
-            "release_date": "2023-06-01",
-            "retail_price_usd": 12.90,
-            "estimated_value_usd": 50.00,
-            "store_link": "https://www.popmart.com/us/pop-now/set/40"
+            "description": "Chestnut cocoa secret",
+            "release_date": "2023-10-01",
+            "retail_price_usd": 12.9,
+            "estimated_value_usd": 120,
+            "store_link": "https://www.popmart.com/us/products/the-monsters-exciting-macaron-series"
         },
         {
             "id": 8,
@@ -114,10 +115,10 @@
             "rarity": "common",
             "size_cm": 8,
             "size_in": 3.2,
-            "description": "Light beige, calm smiling face on chair",
+            "description": "Beige calm expression",
             "release_date": "2023-09-15",
-            "retail_price_usd": 13.50,
-            "estimated_value_usd": 16.00,
+            "retail_price_usd": 13.5,
+            "estimated_value_usd": 35,
             "store_link": "https://www.popmart.com/us/products/1372/the-monsters-have-a-seat-vinyl-plush-blind-box"
         },
         {
@@ -127,10 +128,10 @@
             "rarity": "common",
             "size_cm": 8,
             "size_in": 3.2,
-            "description": "Gray, cheeky grin on sofa",
+            "description": "Gray cheeky grin",
             "release_date": "2023-09-15",
-            "retail_price_usd": 13.50,
-            "estimated_value_usd": 15.50,
+            "retail_price_usd": 13.5,
+            "estimated_value_usd": 32,
             "store_link": "https://www.popmart.com/us/products/1372/the-monsters-have-a-seat-vinyl-plush-blind-box"
         },
         {
@@ -140,10 +141,10 @@
             "rarity": "common",
             "size_cm": 8,
             "size_in": 3.2,
-            "description": "Playful expression on bench",
+            "description": "Playful expression",
             "release_date": "2023-09-15",
-            "retail_price_usd": 13.50,
-            "estimated_value_usd": 15.00,
+            "retail_price_usd": 13.5,
+            "estimated_value_usd": 30,
             "store_link": "https://www.popmart.com/us/products/1372/the-monsters-have-a-seat-vinyl-plush-blind-box"
         },
         {
@@ -153,10 +154,10 @@
             "rarity": "common",
             "size_cm": 8,
             "size_in": 3.2,
-            "description": "Relaxed pose on stool",
+            "description": "Relaxed pose",
             "release_date": "2023-09-15",
-            "retail_price_usd": 13.50,
-            "estimated_value_usd": 14.50,
+            "retail_price_usd": 13.5,
+            "estimated_value_usd": 28,
             "store_link": "https://www.popmart.com/us/products/1372/the-monsters-have-a-seat-vinyl-plush-blind-box"
         },
         {
@@ -166,10 +167,10 @@
             "rarity": "common",
             "size_cm": 8,
             "size_in": 3.2,
-            "description": "Mint green, excited eyes on bean bag",
+            "description": "Mint green excited eyes",
             "release_date": "2023-09-15",
-            "retail_price_usd": 13.50,
-            "estimated_value_usd": 16.50,
+            "retail_price_usd": 13.5,
+            "estimated_value_usd": 35,
             "store_link": "https://www.popmart.com/us/products/1372/the-monsters-have-a-seat-vinyl-plush-blind-box"
         },
         {
@@ -179,10 +180,10 @@
             "rarity": "common",
             "size_cm": 8,
             "size_in": 3.2,
-            "description": "Pale pink, sparkling eyes on lounge",
+            "description": "Pale pink sparkling eyes",
             "release_date": "2023-09-15",
-            "retail_price_usd": 13.50,
-            "estimated_value_usd": 15.00,
+            "retail_price_usd": 13.5,
+            "estimated_value_usd": 32,
             "store_link": "https://www.popmart.com/us/products/1372/the-monsters-have-a-seat-vinyl-plush-blind-box"
         },
         {
@@ -192,10 +193,10 @@
             "rarity": "secret",
             "size_cm": 8,
             "size_in": 3.2,
-            "description": "Chocolate brown, mischievous grin on throne",
+            "description": "Chocolate brown secret",
             "release_date": "2023-09-15",
-            "retail_price_usd": 13.50,
-            "estimated_value_usd": 60.00,
+            "retail_price_usd": 13.5,
+            "estimated_value_usd": 150,
             "store_link": "https://www.popmart.com/us/products/1372/the-monsters-have-a-seat-vinyl-plush-blind-box"
         },
         {
@@ -205,10 +206,10 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Vibrant pose with energy drink",
-            "release_date": "2024-01-10",
-            "retail_price_usd": 14.00,
-            "estimated_value_usd": 16.00,
+            "description": "Red emotion variant",
+            "release_date": "2025-04-01",
+            "retail_price_usd": 14,
+            "estimated_value_usd": 25,
             "store_link": "https://www.popmart.com/us/products/2155/the-monsters-big-into-energy-series-vinyl-plush-pendant-blind-box"
         },
         {
@@ -218,10 +219,10 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Dynamic action pose",
-            "release_date": "2024-01-10",
-            "retail_price_usd": 14.00,
-            "estimated_value_usd": 15.50,
+            "description": "Orange emotion variant",
+            "release_date": "2025-04-01",
+            "retail_price_usd": 14,
+            "estimated_value_usd": 28,
             "store_link": "https://www.popmart.com/us/products/2155/the-monsters-big-into-energy-series-vinyl-plush-pendant-blind-box"
         },
         {
@@ -231,10 +232,10 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Brightly colored, energetic",
-            "release_date": "2024-01-10",
-            "retail_price_usd": 14.00,
-            "estimated_value_usd": 15.00,
+            "description": "Pink/yellow tie-dye",
+            "release_date": "2025-04-01",
+            "retail_price_usd": 14,
+            "estimated_value_usd": 30,
             "store_link": "https://www.popmart.com/us/products/2155/the-monsters-big-into-energy-series-vinyl-plush-pendant-blind-box"
         },
         {
@@ -244,10 +245,10 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Bold, high-energy design",
-            "release_date": "2024-01-10",
-            "retail_price_usd": 14.00,
-            "estimated_value_usd": 16.00,
+            "description": "Green emotion variant",
+            "release_date": "2025-04-01",
+            "retail_price_usd": 14,
+            "estimated_value_usd": 26,
             "store_link": "https://www.popmart.com/us/products/2155/the-monsters-big-into-energy-series-vinyl-plush-pendant-blind-box"
         },
         {
@@ -257,10 +258,10 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Sleek, sporty look",
-            "release_date": "2024-01-10",
-            "retail_price_usd": 14.00,
-            "estimated_value_usd": 15.50,
+            "description": "Blue emotion variant",
+            "release_date": "2025-04-01",
+            "retail_price_usd": 14,
+            "estimated_value_usd": 27,
             "store_link": "https://www.popmart.com/us/products/2155/the-monsters-big-into-energy-series-vinyl-plush-pendant-blind-box"
         },
         {
@@ -270,10 +271,10 @@
             "rarity": "rare",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Glowing accents, rare variant",
-            "release_date": "2024-01-10",
-            "retail_price_usd": 14.00,
-            "estimated_value_usd": 30.00,
+            "description": "Purple emotion variant",
+            "release_date": "2025-04-01",
+            "retail_price_usd": 14,
+            "estimated_value_usd": 35,
             "store_link": "https://www.popmart.com/us/products/2155/the-monsters-big-into-energy-series-vinyl-plush-pendant-blind-box"
         },
         {
@@ -283,11 +284,11 @@
             "rarity": "secret",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Long fur, cosmic design",
-            "release_date": "2024-01-10",
-            "retail_price_usd": 14.00,
-            "estimated_value_usd": 75.00,
-            "store_link": "https://www.popmart.com/us/products/3021/the-monsters-big-into-energy-series-rock-the-universe-vinyl-plush-doll"
+            "description": "Rainbow glitter secret (Rock the Universe)",
+            "release_date": "2025-04-01",
+            "retail_price_usd": 14,
+            "estimated_value_usd": 250,
+            "store_link": "https://www.popmart.com/us/products/2155/the-monsters-big-into-energy-series-vinyl-plush-pendant-blind-box"
         },
         {
             "id": 22,
@@ -296,11 +297,11 @@
             "rarity": "common",
             "size_cm": 5,
             "size_in": 2,
-            "description": "Letter A with adventure theme",
+            "description": "Letter A pendant",
             "release_date": "2024-03-01",
-            "retail_price_usd": 10.50,
-            "estimated_value_usd": 12.00,
-            "store_link": "https://www.popmart.com/us/products/3022/the-monsters-pin-for-love-series-vinyl-plush-pendant-blind-box-a-m"
+            "retail_price_usd": 10.5,
+            "estimated_value_usd": 12,
+            "store_link": "https://www.popmart.com/us/pop-now/set/330"
         },
         {
             "id": 23,
@@ -309,11 +310,11 @@
             "rarity": "common",
             "size_cm": 5,
             "size_in": 2,
-            "description": "Letter B with belief theme",
+            "description": "Letter B pendant",
             "release_date": "2024-03-01",
-            "retail_price_usd": 10.50,
-            "estimated_value_usd": 11.50,
-            "store_link": "https://www.popmart.com/us/products/3022/the-monsters-pin-for-love-series-vinyl-plush-pendant-blind-box-a-m"
+            "retail_price_usd": 10.5,
+            "estimated_value_usd": 11.5,
+            "store_link": "https://www.popmart.com/us/pop-now/set/330"
         },
         {
             "id": 47,
@@ -322,10 +323,10 @@
             "rarity": "common",
             "size_cm": 5,
             "size_in": 2,
-            "description": "Letter Z with zeal theme",
+            "description": "Letter Z pendant",
             "release_date": "2024-03-01",
-            "retail_price_usd": 10.50,
-            "estimated_value_usd": 12.00,
+            "retail_price_usd": 10.5,
+            "estimated_value_usd": 12,
             "store_link": "https://www.popmart.com/us/pop-now/set/330"
         },
         {
@@ -335,11 +336,11 @@
             "rarity": "common",
             "size_cm": 5,
             "size_in": 2,
-            "description": "Purple question mark variant",
+            "description": "Purple question mark",
             "release_date": "2024-03-01",
-            "retail_price_usd": 10.50,
-            "estimated_value_usd": 13.00,
-            "store_link": "https://www.popmart.com/us/products/3022/the-monsters-pin-for-love-series-vinyl-plush-pendant-blind-box-a-m"
+            "retail_price_usd": 10.5,
+            "estimated_value_usd": 20,
+            "store_link": "https://www.popmart.com/us/pop-now/set/330"
         },
         {
             "id": 49,
@@ -348,10 +349,10 @@
             "rarity": "common",
             "size_cm": 5,
             "size_in": 2,
-            "description": "Ampersand symbol variant",
+            "description": "Ampersand symbol",
             "release_date": "2024-03-01",
-            "retail_price_usd": 10.50,
-            "estimated_value_usd": 12.50,
+            "retail_price_usd": 10.5,
+            "estimated_value_usd": 18,
             "store_link": "https://www.popmart.com/us/pop-now/set/330"
         },
         {
@@ -361,10 +362,10 @@
             "rarity": "secret",
             "size_cm": 5,
             "size_in": 2,
-            "description": "Heart-shaped secret variant",
+            "description": "Heart secret",
             "release_date": "2024-03-01",
-            "retail_price_usd": 10.50,
-            "estimated_value_usd": 40.00,
+            "retail_price_usd": 10.5,
+            "estimated_value_usd": 80,
             "store_link": "https://www.popmart.com/us/pop-now/set/330"
         },
         {
@@ -374,10 +375,10 @@
             "rarity": "secret",
             "size_cm": 5,
             "size_in": 2,
-            "description": "Exclamation mark secret",
+            "description": "Exclamation secret",
             "release_date": "2024-03-01",
-            "retail_price_usd": 10.50,
-            "estimated_value_usd": 45.00,
+            "retail_price_usd": 10.5,
+            "estimated_value_usd": 90,
             "store_link": "https://www.popmart.com/us/pop-now/set/330"
         },
         {
@@ -387,10 +388,10 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Silver can design",
+            "description": "Classic red can design",
             "release_date": "2024-07-20",
-            "retail_price_usd": 15.00,
-            "estimated_value_usd": 18.00,
+            "retail_price_usd": 15,
+            "estimated_value_usd": 18,
             "store_link": "https://www.popmart.com/us/pop-now/set/171"
         },
         {
@@ -400,10 +401,10 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Classic bottle shape",
+            "description": "Glass bottle shape",
             "release_date": "2024-07-20",
-            "retail_price_usd": 15.00,
-            "estimated_value_usd": 17.50,
+            "retail_price_usd": 15,
+            "estimated_value_usd": 17,
             "store_link": "https://www.popmart.com/us/pop-now/set/171"
         },
         {
@@ -413,10 +414,10 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Red cherry variant",
+            "description": "Cherry flavor variant",
             "release_date": "2024-07-20",
-            "retail_price_usd": 15.00,
-            "estimated_value_usd": 18.50,
+            "retail_price_usd": 15,
+            "estimated_value_usd": 19,
             "store_link": "https://www.popmart.com/us/pop-now/set/171"
         },
         {
@@ -426,10 +427,10 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Sleek silver design",
+            "description": "Silver can design",
             "release_date": "2024-07-20",
-            "retail_price_usd": 15.00,
-            "estimated_value_usd": 17.00,
+            "retail_price_usd": 15,
+            "estimated_value_usd": 17,
             "store_link": "https://www.popmart.com/us/pop-now/set/171"
         },
         {
@@ -439,10 +440,10 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Black can variant",
+            "description": "Black can design",
             "release_date": "2024-07-20",
-            "retail_price_usd": 15.00,
-            "estimated_value_usd": 17.50,
+            "retail_price_usd": 15,
+            "estimated_value_usd": 18,
             "store_link": "https://www.popmart.com/us/pop-now/set/171"
         },
         {
@@ -452,10 +453,10 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Creamy beige design",
+            "description": "Cream vanilla variant",
             "release_date": "2024-07-20",
-            "retail_price_usd": 15.00,
-            "estimated_value_usd": 18.00,
+            "retail_price_usd": 15,
+            "estimated_value_usd": 20,
             "store_link": "https://www.popmart.com/us/pop-now/set/171"
         },
         {
@@ -465,10 +466,10 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Beach-themed with surfboard",
+            "description": "Beach surfboard design",
             "release_date": "2024-07-20",
-            "retail_price_usd": 15.00,
-            "estimated_value_usd": 19.00,
+            "retail_price_usd": 15,
+            "estimated_value_usd": 22,
             "store_link": "https://www.popmart.com/us/pop-now/set/171"
         },
         {
@@ -478,10 +479,10 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Holiday-themed design",
+            "description": "Holiday theme",
             "release_date": "2024-07-20",
-            "retail_price_usd": 15.00,
-            "estimated_value_usd": 18.50,
+            "retail_price_usd": 15,
+            "estimated_value_usd": 18,
             "store_link": "https://www.popmart.com/us/pop-now/set/171"
         },
         {
@@ -491,10 +492,10 @@
             "rarity": "rare",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Shiny silver rare variant",
+            "description": "Polar bear secret",
             "release_date": "2024-07-20",
-            "retail_price_usd": 15.00,
-            "estimated_value_usd": 35.00,
+            "retail_price_usd": 15,
+            "estimated_value_usd": 200,
             "store_link": "https://www.popmart.com/us/pop-now/set/171"
         },
         {
@@ -504,11 +505,11 @@
             "rarity": "secret",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Unique cola-themed secret",
-            "release_date": "2024-07-20",
-            "retail_price_usd": 15.00,
-            "estimated_value_usd": 70.00,
-            "store_link": "https://www.popmart.com/us/pop-now/set/171"
+            "description": "Sunglasses relaxed pose",
+            "release_date": "2024-02-15",
+            "retail_price_usd": 15,
+            "estimated_value_usd": 50,
+            "store_link": "https://www.popmart.com/us/products/578/labubu-time-to-chill-vinyl-plush-doll"
         },
         {
             "id": 62,
@@ -517,11 +518,11 @@
             "rarity": "common",
             "size_cm": 7.5,
             "size_in": 3,
-            "description": "Festive red and white design",
-            "release_date": "2024-07-20",
-            "retail_price_usd": 15.00,
-            "estimated_value_usd": 18.00,
-            "store_link": "https://www.popmart.com/us/pop-now/set/171"
+            "description": "Bouncing pose",
+            "release_date": "2024-04-10",
+            "retail_price_usd": 15,
+            "estimated_value_usd": 45,
+            "store_link": "https://www.popmart.com/us/products/281/the-monsters-jump-for-joy-vinyl-plush-doll"
         },
         {
             "id": 63,
@@ -530,11 +531,11 @@
             "rarity": "limited",
             "size_cm": 30,
             "size_in": 11.8,
-            "description": "Large forest-themed plush",
-            "release_date": "2024-05-01",
+            "description": "Coffee outfit",
+            "release_date": "2024-06-20",
             "retail_price_usd": 49.99,
-            "estimated_value_usd": 60.00,
-            "store_link": "https://www.popmart.com/us/products/1061/the-monsters-fall-in-wild-series-vinyl-plush-doll-pendant"
+            "estimated_value_usd": 48,
+            "store_link": "https://www.popmart.com/us/products/676/the-monsters-dress-be-latte-vinyl-plush-doll"
         },
         {
             "id": 64,
@@ -543,11 +544,11 @@
             "rarity": "limited",
             "size_cm": 10,
             "size_in": 3.9,
-            "description": "Mini forest-themed keychain",
-            "release_date": "2024-05-01",
+            "description": "Acrobatic pose",
+            "release_date": "2024-08-01",
             "retail_price_usd": 19.99,
-            "estimated_value_usd": 25.00,
-            "store_link": "https://www.popmart.com/us/products/1061/the-monsters-fall-in-wild-series-vinyl-plush-doll-pendant"
+            "estimated_value_usd": 47,
+            "store_link": "https://www.popmart.com/us/products/1371/the-monsters-flip-with-me-vinyl-plush-doll"
         },
         {
             "id": 65,
@@ -559,7 +560,7 @@
             "description": "Relaxed pose with sunglasses",
             "release_date": "2024-02-15",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
+            "estimated_value_usd": 50,
             "store_link": "https://au.popmart.com/products/pop-mart-the-monsters-labubu-time-to-chill-vinyl-plush-doll"
         },
         {
@@ -572,7 +573,7 @@
             "description": "Bouncing cheerful design",
             "release_date": "2024-04-10",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 45.00,
+            "estimated_value_usd": 45,
             "store_link": null
         },
         {
@@ -582,11 +583,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Coffee-themed outfit",
-            "release_date": "2024-06-20",
+            "description": "Fortune theme",
+            "release_date": "2024-10-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 48.00,
-            "store_link": null
+            "estimated_value_usd": 50,
+            "store_link": "https://www.popmart.com/us/products/890/the-monsters-best-of-luck-vinyl-plush-doll"
         },
         {
             "id": 68,
@@ -595,11 +596,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Acrobatic pose",
-            "release_date": "2024-08-01",
+            "description": "Playful chase",
+            "release_date": "2024-07-15",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 47.00,
-            "store_link": null
+            "estimated_value_usd": 45,
+            "store_link": "https://www.popmart.com/us/products/922/the-monsters-catch-me-if-you-like-me-series-vinyl-doll-gift-box"
         },
         {
             "id": 69,
@@ -608,11 +609,11 @@
             "rarity": "limited",
             "size_cm": 30,
             "size_in": 11.8,
-            "description": "Chess-themed large plush",
-            "release_date": "2024-09-10",
+            "description": "Glam outfit",
+            "release_date": "2024-11-01",
             "retail_price_usd": 49.99,
-            "estimated_value_usd": 60.00,
-            "store_link": null
+            "estimated_value_usd": 50,
+            "store_link": "https://www.popmart.com/us/products/1012/labubu-%25C3%2597-pronounce-be-fancy-now-vinyl-plush-doll"
         },
         {
             "id": 70,
@@ -621,11 +622,11 @@
             "rarity": "limited",
             "size_cm": 10,
             "size_in": 3.9,
-            "description": "Chess-themed keychain",
-            "release_date": "2024-09-10",
+            "description": "Fairy wings",
+            "release_date": "2024-12-01",
             "retail_price_usd": 19.99,
-            "estimated_value_usd": 25.00,
-            "store_link": null
+            "estimated_value_usd": 52,
+            "store_link": "https://www.popmart.com/us/products/1580/labubu-%25C3%2597-pronounce-wings-of-fantasy-vinyl-plush-doll"
         },
         {
             "id": 71,
@@ -634,11 +635,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Lucky charm design",
-            "release_date": "2024-10-01",
+            "description": "Singapore exclusive",
+            "release_date": "2024-06-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
-            "store_link": null
+            "estimated_value_usd": 80,
+            "store_link": "https://www.popmart.com/sg/products/1149/LABUBU-HIDE-AND-SEEK-IN-SINGAPORE-SERIES-Vinyl-Plush-Doll-Pendant"
         },
         {
             "id": 72,
@@ -650,7 +651,7 @@
             "description": "Fortune-themed plush",
             "release_date": "2024-10-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 48.00,
+            "estimated_value_usd": 48,
             "store_link": null
         },
         {
@@ -660,11 +661,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Playful chase design",
-            "release_date": "2024-07-15",
+            "description": "Pop Mart 14th anniversary edition",
+            "release_date": "2024-12-10",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 45.00,
-            "store_link": null
+            "estimated_value_usd": 90,
+            "store_link": "https://www.popmart.com/us/products/1477/matchless-pop-mart-14th-anniversary-series-figures"
         },
         {
             "id": 74,
@@ -676,7 +677,7 @@
             "description": "Vans sneaker collab",
             "release_date": "2024-08-20",
             "retail_price_usd": 49.99,
-            "estimated_value_usd": 65.00,
+            "estimated_value_usd": 65,
             "store_link": null
         },
         {
@@ -689,7 +690,7 @@
             "description": "Pumpkin-themed Halloween plush",
             "release_date": "2024-10-15",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 55.00,
+            "estimated_value_usd": 55,
             "store_link": null
         },
         {
@@ -702,7 +703,7 @@
             "description": "Glamorous outfit design",
             "release_date": "2024-11-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
+            "estimated_value_usd": 50,
             "store_link": null
         },
         {
@@ -712,11 +713,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Fairy-winged plush",
-            "release_date": "2024-12-01",
+            "description": "Hide-and-seek Zimomo",
+            "release_date": "2024-06-15",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 52.00,
-            "store_link": null
+            "estimated_value_usd": 50,
+            "store_link": "https://www.popmart.com/us/products/878/the-monsters-i-found-you-vinyl-face-doll"
         },
         {
             "id": 78,
@@ -725,11 +726,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Golden-winged lucky design",
-            "release_date": "2024-12-01",
+            "description": "Cloud angel Zimomo",
+            "release_date": "2024-06-15",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
-            "store_link": null
+            "estimated_value_usd": 65,
+            "store_link": "https://www.popmart.com/us/products/878/the-monsters-i-found-you-vinyl-face-doll"
         },
         {
             "id": 79,
@@ -738,11 +739,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Singapore-exclusive playful design",
-            "release_date": "2024-06-01",
-            "retail_price_usd": 45.00,
-            "estimated_value_usd": 60.00,
-            "store_link": null
+            "description": "Enchanted forest",
+            "release_date": "2024-08-01",
+            "retail_price_usd": 45,
+            "estimated_value_usd": 48,
+            "store_link": "https://www.popmart.com/us/products/2934/POP-BEAN-THE-MONSTERS-Forest-Fairy-Tale-Set-LABUBU-Waiting-For-The-Prologue"
         },
         {
             "id": 80,
@@ -751,11 +752,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Thailand-exclusive fortune theme",
-            "release_date": "2024-06-01",
-            "retail_price_usd": 45.00,
-            "estimated_value_usd": 58.00,
-            "store_link": null
+            "description": "Astronaut Labubu",
+            "release_date": "2024-10-01",
+            "retail_price_usd": 45,
+            "estimated_value_usd": 52,
+            "store_link": "https://www.popmart.com/au/products/202/the-monsters-space-adventures-series"
         },
         {
             "id": 81,
@@ -764,11 +765,11 @@
             "rarity": "limited",
             "size_cm": 30,
             "size_in": 11.8,
-            "description": "Cosmic-themed large plush",
-            "release_date": "2024-11-15",
+            "description": "Gamer Labubu",
+            "release_date": "2024-11-01",
             "retail_price_usd": 49.99,
-            "estimated_value_usd": 65.00,
-            "store_link": null
+            "estimated_value_usd": 50,
+            "store_link": "https://www.popmart.com/us/products/1500/the-monsters-playing-games-series-scene-sets"
         },
         {
             "id": 82,
@@ -780,7 +781,7 @@
             "description": "Pop Mart anniversary edition",
             "release_date": "2024-12-10",
             "retail_price_usd": 59.99,
-            "estimated_value_usd": 80.00,
+            "estimated_value_usd": 80,
             "store_link": null
         },
         {
@@ -793,7 +794,7 @@
             "description": "Large sweet-themed Mokoko",
             "release_date": "2024-03-15",
             "retail_price_usd": 49.99,
-            "estimated_value_usd": 60.00,
+            "estimated_value_usd": 60,
             "store_link": "https://www.popmart.com/us/pop-now/set/150"
         },
         {
@@ -806,7 +807,7 @@
             "description": "Mini sweet-themed keychain",
             "release_date": "2024-03-15",
             "retail_price_usd": 19.99,
-            "estimated_value_usd": 25.00,
+            "estimated_value_usd": 25,
             "store_link": "https://www.popmart.com/us/pop-now/set/150"
         },
         {
@@ -819,7 +820,7 @@
             "description": "Large floral-themed Mokoko",
             "release_date": "2024-04-01",
             "retail_price_usd": 49.99,
-            "estimated_value_usd": 58.00,
+            "estimated_value_usd": 58,
             "store_link": null
         },
         {
@@ -832,7 +833,7 @@
             "description": "Mini floral-themed keychain",
             "release_date": "2024-04-01",
             "retail_price_usd": 19.99,
-            "estimated_value_usd": 24.00,
+            "estimated_value_usd": 24,
             "store_link": null
         },
         {
@@ -845,7 +846,7 @@
             "description": "Sparkling blue design",
             "release_date": "2024-05-10",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
+            "estimated_value_usd": 50,
             "store_link": null
         },
         {
@@ -858,7 +859,7 @@
             "description": "Halloween pumpkin theme",
             "release_date": "2024-10-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 55.00,
+            "estimated_value_usd": 55,
             "store_link": null
         },
         {
@@ -871,7 +872,7 @@
             "description": "Fairy-tale inspired design",
             "release_date": "2024-12-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 52.00,
+            "estimated_value_usd": 52,
             "store_link": null
         },
         {
@@ -881,11 +882,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Playful hide-and-seek theme",
-            "release_date": "2024-06-15",
+            "description": "Tycoco with boyfriend outfit",
+            "release_date": "2024-07-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
-            "store_link": "https://www.popmart.com/us/products/878/the-monsters-i-found-you-vinyl-face-doll"
+            "estimated_value_usd": 50,
+            "store_link": "https://www.popmart.com/us/collection/11/the-monsters"
         },
         {
             "id": 91,
@@ -894,11 +895,11 @@
             "rarity": "rare",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Cloudy angelic design",
-            "release_date": "2024-06-15",
+            "description": "Pop Mart store theme",
+            "release_date": "2024-09-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 60.00,
-            "store_link": "https://www.popmart.com/us/products/878/the-monsters-i-found-you-vinyl-face-doll"
+            "estimated_value_usd": 50,
+            "store_link": "https://www.popmart.com/us/products/2771/the-monsters-wacky-mart-series-figures"
         },
         {
             "id": 92,
@@ -910,7 +911,7 @@
             "description": "Tycoco with boyfriend outfit",
             "release_date": "2024-07-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
+            "estimated_value_usd": 50,
             "store_link": "https://www.popmart.com/us/collection/11/the-monsters"
         },
         {
@@ -923,7 +924,7 @@
             "description": "Enchanted forest design",
             "release_date": "2024-08-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 48.00,
+            "estimated_value_usd": 48,
             "store_link": null
         },
         {
@@ -936,7 +937,7 @@
             "description": "Pop Mart store-themed plush",
             "release_date": "2024-09-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
+            "estimated_value_usd": 50,
             "store_link": null
         },
         {
@@ -949,7 +950,7 @@
             "description": "Astronaut-themed plush",
             "release_date": "2024-10-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 52.00,
+            "estimated_value_usd": 52,
             "store_link": null
         },
         {
@@ -962,7 +963,7 @@
             "description": "Gamer-themed design",
             "release_date": "2024-11-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
+            "estimated_value_usd": 50,
             "store_link": null
         },
         {
@@ -975,7 +976,7 @@
             "description": "Snowflake-themed winter plush",
             "release_date": "2024-12-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 55.00,
+            "estimated_value_usd": 55,
             "store_link": null
         },
         {
@@ -987,8 +988,8 @@
             "size_in": 9.8,
             "description": "Japan-exclusive cherry blossom design",
             "release_date": "2024-03-01",
-            "retail_price_usd": 45.00,
-            "estimated_value_usd": 60.00,
+            "retail_price_usd": 45,
+            "estimated_value_usd": 60,
             "store_link": null
         },
         {
@@ -1000,8 +1001,8 @@
             "size_in": 9.8,
             "description": "Festive red and gold design",
             "release_date": "2024-02-01",
-            "retail_price_usd": 45.00,
-            "estimated_value_usd": 58.00,
+            "retail_price_usd": 45,
+            "estimated_value_usd": 58,
             "store_link": null
         },
         {
@@ -1014,7 +1015,7 @@
             "description": "Ocean-themed mermaid design",
             "release_date": "2024-07-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
+            "estimated_value_usd": 50,
             "store_link": null
         },
         {
@@ -1027,7 +1028,7 @@
             "description": "Starry night-themed plush",
             "release_date": "2024-08-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 48.00,
+            "estimated_value_usd": 48,
             "store_link": null
         },
         {
@@ -1040,7 +1041,7 @@
             "description": "Colorful rainbow design",
             "release_date": "2024-09-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
+            "estimated_value_usd": 50,
             "store_link": null
         },
         {
@@ -1053,7 +1054,7 @@
             "description": "Candy-themed festival design",
             "release_date": "2024-10-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 52.00,
+            "estimated_value_usd": 52,
             "store_link": null
         },
         {
@@ -1063,11 +1064,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Autumn-themed golden plush",
-            "release_date": "2024-11-01",
+            "description": "Large forest plush",
+            "release_date": "2024-05-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
-            "store_link": null
+            "estimated_value_usd": 60,
+            "store_link": "https://www.popmart.com/us/products/1061/the-monsters-fall-in-wild-series-vinyl-plush-doll-pendant"
         },
         {
             "id": 105,
@@ -1076,11 +1077,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Icy blue winter design",
-            "release_date": "2024-12-01",
+            "description": "Mini forest keychain",
+            "release_date": "2024-05-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 55.00,
-            "store_link": null
+            "estimated_value_usd": 25,
+            "store_link": "https://www.popmart.com/us/products/1061/the-monsters-fall-in-wild-series-vinyl-plush-doll-pendant"
         },
         {
             "id": 106,
@@ -1092,7 +1093,7 @@
             "description": "Space-themed explorer design",
             "release_date": "2024-10-15",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
+            "estimated_value_usd": 50,
             "store_link": null
         },
         {
@@ -1102,11 +1103,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Fluffy cloud-themed plush",
-            "release_date": "2024-11-15",
+            "description": "Golden wings",
+            "release_date": "2024-12-01",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 48.00,
-            "store_link": null
+            "estimated_value_usd": 50,
+            "store_link": "https://www.popmart.com/us/products/1584/labubu-%25C3%2597-pronounce-wings-of-fortune-vinyl-plush-hanging-card"
         },
         {
             "id": 108,
@@ -1118,7 +1119,7 @@
             "description": "Fireworks-themed festive plush",
             "release_date": "2024-12-15",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
+            "estimated_value_usd": 50,
             "store_link": null
         },
         {
@@ -1131,7 +1132,7 @@
             "description": "Tropical island design",
             "release_date": "2024-07-15",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
+            "estimated_value_usd": 50,
             "store_link": null
         },
         {
@@ -1144,7 +1145,7 @@
             "description": "Night garden-themed plush",
             "release_date": "2024-08-15",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 48.00,
+            "estimated_value_usd": 48,
             "store_link": null
         },
         {
@@ -1154,11 +1155,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Star-themed adventure design",
-            "release_date": "2024-09-15",
+            "description": "Festive red & white",
+            "release_date": "2024-07-20",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
-            "store_link": null
+            "estimated_value_usd": 18,
+            "store_link": "https://www.popmart.com/us/pop-now/set/171"
         },
         {
             "id": 112,
@@ -1167,11 +1168,11 @@
             "rarity": "limited",
             "size_cm": 25,
             "size_in": 9.8,
-            "description": "Clover-themed lucky plush",
-            "release_date": "2024-10-15",
+            "description": "Shiny silver variant",
+            "release_date": "2024-07-20",
             "retail_price_usd": 39.99,
-            "estimated_value_usd": 50.00,
-            "store_link": null
+            "estimated_value_usd": 35,
+            "store_link": "https://www.popmart.com/us/pop-now/set/171"
         },
         {
             "id": 113,
@@ -1180,11 +1181,11 @@
             "rarity": "ultra-rare",
             "size_cm": 40,
             "size_in": 15.7,
-            "description": "Oversized exclusive plush",
-            "release_date": "2024-12-20",
+            "description": "Special secret",
+            "release_date": "2024-07-20",
             "retail_price_usd": 99.99,
-            "estimated_value_usd": 150.00,
-            "store_link": null
+            "estimated_value_usd": 150,
+            "store_link": "https://www.popmart.com/us/pop-now/set/171"
         }
     ]
 }

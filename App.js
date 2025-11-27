@@ -11,9 +11,9 @@ import PaywallScreen from './PaywallScreen';
 
 // Firebase imports
 import { initializeApp } from 'firebase/app';
-import { initializeAuth, getReactNativePersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
-import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { initializeAuth, getReactNativePersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, deleteUser } from 'firebase/auth';
+import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, onSnapshot, deleteDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject, listAll } from 'firebase/storage';
 
 // FIREBASE CONFIG - Your actual Firebase project config
 const firebaseConfig = {
@@ -73,6 +73,7 @@ function AuthScreen() {
           <TextInput
             style={styles.input}
             placeholder="Email"
+            placeholderTextColor="#999"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -82,6 +83,7 @@ function AuthScreen() {
           <TextInput
             style={styles.input}
             placeholder="Password"
+            placeholderTextColor="#999"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -748,13 +750,13 @@ function CollectionScreen({ user, onBrowse, onBack, onNavigate }) {
           animationType="slide"
           onRequestClose={() => setShowPhotoOptions(false)}
         >
-          <Pressable 
+          <Pressable
             style={styles.photoModalOverlay}
             onPress={() => setShowPhotoOptions(false)}
           >
             <View style={styles.photoModalContent}>
               <Text style={styles.photoOptionsTitle}>Add Photo</Text>
-              
+
               <TouchableOpacity
                 style={styles.photoOptionButton}
                 onPress={() => {
@@ -1181,6 +1183,75 @@ function ProfileScreen({ user, onBack, onNavigate }) {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    // Show confirmation alert (Apple requires this)
+    Alert.alert(
+      'Delete Account',
+      'Are you sure you want to delete your account? This will permanently delete all your data including your collection, photos, and profile. This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel'
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setSaving(true);
+              const userId = user.uid;
+
+              // 1. Delete user photos from Storage
+              try {
+                const photosRef = ref(storage, `users/${userId}/photos`);
+                const photosList = await listAll(photosRef);
+                await Promise.all(photosList.items.map(item => deleteObject(item)));
+
+                // Delete avatar if exists
+                const avatarRef = ref(storage, `users/${userId}/avatar.jpg`);
+                try {
+                  await deleteObject(avatarRef);
+                } catch (e) {
+                  // Avatar might not exist, ignore
+                }
+              } catch (e) {
+                console.error('Error deleting photos:', e);
+              }
+
+              // 2. Delete user document from Firestore
+              try {
+                await deleteDoc(doc(db, 'users', userId));
+              } catch (e) {
+                console.error('Error deleting user document:', e);
+              }
+
+              // 3. Delete Firebase Auth user
+              const currentUser = auth.currentUser;
+              if (currentUser) {
+                await deleteUser(currentUser);
+              }
+
+              // 4. Sign out (will navigate back to login automatically)
+              await signOut(auth);
+
+              Alert.alert('Account Deleted', 'Your account has been permanently deleted.');
+            } catch (error) {
+              console.error('Error deleting account:', error);
+              Alert.alert(
+                'Error',
+                error.code === 'auth/requires-recent-login'
+                  ? 'For security, please log out and log back in before deleting your account.'
+                  : 'Failed to delete account. Please try again or contact support.'
+              );
+            } finally {
+              setSaving(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
 
   return (
     <View style={styles.container}>
@@ -1282,6 +1353,37 @@ function ProfileScreen({ user, onBack, onNavigate }) {
             )}
           </View>
         </View>
+
+        {/* Delete Account Section */}
+        <View style={styles.sectionBubble}>
+          <Text style={[styles.sectionTitle, { color: '#ef4444', marginBottom: 12 }]}>Danger Zone</Text>
+          <TouchableOpacity
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              handleDeleteAccount();
+            }}
+            disabled={saving}
+            style={{
+              backgroundColor: '#ef4444',
+              paddingVertical: 14,
+              paddingHorizontal: 20,
+              borderRadius: 12,
+              alignItems: 'center',
+              opacity: saving ? 0.6 : 1
+            }}
+          >
+            {saving ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={{ color: '#fff', fontWeight: '600', fontSize: 16 }}>
+                Delete Account
+              </Text>
+            )}
+          </TouchableOpacity>
+          <Text style={[styles.cardSubtitle, { marginTop: 8, fontSize: 12, textAlign: 'center' }]}>
+            Permanently delete your account and all data
+          </Text>
+        </View>
       </ScrollView>
 
       <TabBar currentScreen="profile" onNavigate={onNavigate} />
@@ -1295,27 +1397,23 @@ function StoreScreen({ onBack, onNavigate }) {
   const [queryText, setQueryText] = useState('');
   const [sortBy, setSortBy] = useState('name');
 
-  const withLinks = React.useMemo(
-    () => items.filter(i => i?.storeLinks?.popmart),
-    [items]
-  );
-
+  // Show all items, not just those with store links
   const filtered = React.useMemo(() => {
     const q = queryText.trim().toLowerCase();
     let list = q
-      ? withLinks.filter(i =>
+      ? items.filter(i =>
         (i.name || '').toLowerCase().includes(q) ||
         (i.series || '').toLowerCase().includes(q) ||
         [i.series, i.rarity].filter(Boolean).some(t => (t || '').toLowerCase().includes(q))
       )
-      : withLinks;
+      : items;
 
     switch (sortBy) {
       case 'price': return [...list].sort((a, b) => (a.originalPrice ?? 0) - (b.originalPrice ?? 0));
       case 'series': return [...list].sort((a, b) => (a.series || '').localeCompare(b.series || ''));
       default: return [...list].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     }
-  }, [withLinks, queryText, sortBy]);
+  }, [items, queryText, sortBy]);
 
   return (
     <View style={styles.container}>
@@ -1428,9 +1526,13 @@ function StoreScreen({ onBack, onNavigate }) {
                   style={[styles.actionButton, styles.buyButton]}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    item.storeLinks?.popmart && Linking.openURL(item.storeLinks.popmart);
+                    // Check multiple possible store link formats
+                    const storeUrl = item.storeLinks?.popmart || item.storeLink || item.store_link;
+                    if (storeUrl) {
+                      Linking.openURL(storeUrl);
+                    }
                   }}
-                  disabled={!item.storeLinks?.popmart}
+                  disabled={!item.storeLinks?.popmart && !item.storeLink && !item.store_link}
                 >
                   <Text style={[styles.actionButtonText, styles.buyButtonText]}>🛒 Buy</Text>
                 </TouchableOpacity>
@@ -1916,6 +2018,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderWidth: 1,
     borderColor: '#ddd',
+    color: '#333',
+    fontSize: 16,
   },
   button: {
     backgroundColor: '#6366f1',
@@ -2112,6 +2216,7 @@ const styles = StyleSheet.create({
   },
   gridContent: {
     padding: 10,
+    paddingBottom: 100, // Extra padding to prevent last items from being cut off by TabBar
   },
   labubuCard: {
     flex: 1,
