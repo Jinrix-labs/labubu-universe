@@ -8,16 +8,23 @@ import type {
 export type Series = Tables<'series'>;
 export type BuyLink = Tables<'buy_links'>;
 export type UserFigure = Tables<'user_figures'>;
+export type SeriesCompletion = {
+  series_id: string;
+  series_name: string;
+  total: number;
+  owned: number;
+};
 
 export type FigureWithSeries = Tables<'figures'> & {
   series: Pick<Series, 'id' | 'name'> | null;
+  buy_links?: BuyLink[];
 };
 
 export type FigureDetail = FigureWithSeries & {
   buy_links: BuyLink[];
 };
 
-/** user_figures row with joined figure (+ nested series). */
+/** user_figures row with joined figure (+ nested series / buy links). */
 export type CollectionItem = UserFigure & {
   figures: FigureWithSeries | null;
 };
@@ -27,6 +34,64 @@ export type CollectionSeriesGroup = {
   seriesName: string;
   items: Array<CollectionItem & { figures: FigureWithSeries }>;
 };
+
+export type CollectionStats = {
+  totalOwned: number;
+  valueMin: number | null;
+  valueMax: number | null;
+  paidTotal: number | null;
+  worthMultiple: number | null;
+};
+
+const FIGURE_EMBED = `
+  id,
+  series_id,
+  name,
+  image_url,
+  rarity,
+  est_value_min,
+  est_value_max,
+  original_price,
+  legacy_id,
+  created_at,
+  series ( id, name ),
+  buy_links ( id, figure_id, retailer, url, is_affiliate )
+`;
+
+function normalizeFigure(
+  raw: FigureWithSeries | FigureWithSeries[] | null | undefined,
+): FigureWithSeries | null {
+  let figure = raw ?? null;
+  if (Array.isArray(figure)) {
+    figure = figure[0] ?? null;
+  }
+  if (!figure) return null;
+
+  let series = figure.series as FigureWithSeries['series'] | Series[] | null;
+  if (Array.isArray(series)) {
+    series = series[0] ?? null;
+  }
+
+  let buyLinks = figure.buy_links;
+  if (buyLinks && !Array.isArray(buyLinks)) {
+    buyLinks = [buyLinks];
+  }
+
+  return {
+    ...figure,
+    series,
+    buy_links: buyLinks ?? [],
+  };
+}
+
+function normalizeCollectionRows(data: unknown[] | null): CollectionItem[] {
+  return (data ?? []).map((raw) => {
+    const row = raw as CollectionItem & {
+      figures?: FigureWithSeries | FigureWithSeries[] | null;
+    };
+    return { ...row, figures: normalizeFigure(row.figures) };
+  });
+}
 
 export async function fetchSeries(): Promise<Series[]> {
   const { data, error } = await supabase
@@ -44,7 +109,7 @@ export async function fetchFigures(options?: {
 }): Promise<FigureWithSeries[]> {
   let query = supabase
     .from('figures')
-    .select('*, series(id, name)')
+    .select('*, series(id, name), buy_links(*)')
     .order('name', { ascending: true });
 
   if (options?.seriesId) {
@@ -58,7 +123,9 @@ export async function fetchFigures(options?: {
 
   const { data, error } = await query;
   if (error) throw error;
-  return (data ?? []) as FigureWithSeries[];
+  return (data ?? []).map((row) =>
+    normalizeFigure(row as FigureWithSeries),
+  ).filter((f): f is FigureWithSeries => f != null);
 }
 
 export async function fetchFigureById(id: string): Promise<FigureDetail> {
@@ -69,7 +136,9 @@ export async function fetchFigureById(id: string): Promise<FigureDetail> {
     .single();
 
   if (error) throw error;
-  return data as FigureDetail;
+  const figure = normalizeFigure(data as FigureWithSeries);
+  if (!figure) throw new Error('Figure not found');
+  return { ...figure, buy_links: figure.buy_links ?? [] };
 }
 
 export async function fetchUserFigures(
@@ -93,11 +162,8 @@ export async function fetchUserFigures(
   return data ?? [];
 }
 
-/**
- * Owned collection with figure + series embeds.
- * Status filter is exact equality on 'owned' (DB check constraint).
- */
-export async function fetchOwnedCollection(
+/** All user_figures (owned + wishlist) with figure embeds. */
+export async function fetchCollectionItems(
   userId: string,
 ): Promise<CollectionItem[]> {
   const { data, error } = await supabase
@@ -109,29 +175,15 @@ export async function fetchOwnedCollection(
       status,
       quantity,
       added_at,
-      figures (
-        id,
-        series_id,
-        name,
-        image_url,
-        rarity,
-        est_value_min,
-        est_value_max,
-        original_price,
-        legacy_id,
-        created_at,
-        series ( id, name )
-      )
+      figures ( ${FIGURE_EMBED} )
     `,
     )
     .eq('user_id', userId)
-    .eq('status', 'owned')
     .order('added_at', { ascending: false });
 
   if (__DEV__) {
-    console.log('[fetchOwnedCollection] raw response', {
+    console.log('[fetchCollectionItems] raw response', {
       userId,
-      statusFilter: 'owned',
       count: data?.length ?? 0,
       data,
       error,
@@ -143,55 +195,91 @@ export async function fetchOwnedCollection(
   }
 
   if (error) throw error;
-
-  // Normalize embeds: PostgREST may return object or single-element array.
-  const rows: CollectionItem[] = (data ?? []).map((raw) => {
-    const row = raw as CollectionItem & {
-      figures?: FigureWithSeries | FigureWithSeries[] | null;
-    };
-    let figure = row.figures ?? null;
-    if (Array.isArray(figure)) {
-      figure = figure[0] ?? null;
-    }
-    if (figure && Array.isArray(figure.series)) {
-      figure = {
-        ...figure,
-        series: (figure.series as unknown as Series[])[0] ?? null,
-      };
-    }
-    return { ...row, figures: figure };
-  });
-
-  const missingFigure = rows.filter((row) => row.figures == null).length;
-  if (__DEV__ && missingFigure > 0) {
-    console.warn(
-      `[fetchOwnedCollection] ${missingFigure} owned row(s) had null figures join`,
-      rows.filter((row) => row.figures == null),
-    );
-  }
-
-  return rows;
+  return normalizeCollectionRows(data as unknown[] | null);
 }
 
-/** Group owned items by series; null/missing series → "Unknown series". */
+/** @deprecated prefer fetchCollectionItems */
+export async function fetchOwnedCollection(
+  userId: string,
+): Promise<CollectionItem[]> {
+  const items = await fetchCollectionItems(userId);
+  return items.filter((row) => row.status === 'owned');
+}
+
+export function filterOwned(items: CollectionItem[]): CollectionItem[] {
+  return items.filter((row) => row.status === 'owned' && row.figures != null);
+}
+
+export function filterWishlist(items: CollectionItem[]): CollectionItem[] {
+  return items.filter(
+    (row) => row.status === 'wishlist' && row.figures != null,
+  );
+}
+
+/** Dupes: owned with quantity > 1. Spare count = quantity - 1. */
+export function filterDupes(items: CollectionItem[]): CollectionItem[] {
+  return items.filter(
+    (row) =>
+      row.status === 'owned' && row.quantity > 1 && row.figures != null,
+  );
+}
+
+export function spareCount(quantity: number): number {
+  return Math.max(0, quantity - 1);
+}
+
+export function primaryBuyUrl(figure: FigureWithSeries | null): string | null {
+  const links = figure?.buy_links ?? [];
+  return links[0]?.url ?? null;
+}
+
+export function computeCollectionStats(
+  items: CollectionItem[],
+): CollectionStats {
+  const owned = filterOwned(items);
+
+  let valueMin = 0;
+  let valueMax = 0;
+  let hasValue = false;
+  let paidTotal = 0;
+  let hasPaid = false;
+
+  for (const item of owned) {
+    const fig = item.figures!;
+    const qty = Math.max(1, item.quantity);
+
+    if (fig.est_value_min != null || fig.est_value_max != null) {
+      hasValue = true;
+      valueMin += Number(fig.est_value_min ?? fig.est_value_max ?? 0) * qty;
+      valueMax += Number(fig.est_value_max ?? fig.est_value_min ?? 0) * qty;
+    }
+
+    if (fig.original_price != null) {
+      hasPaid = true;
+      paidTotal += Number(fig.original_price) * qty;
+    }
+  }
+
+  const mid = hasValue ? (valueMin + valueMax) / 2 : null;
+  const worthMultiple =
+    hasPaid && paidTotal > 0 && mid != null ? mid / paidTotal : null;
+
+  return {
+    totalOwned: owned.length,
+    valueMin: hasValue ? valueMin : null,
+    valueMax: hasValue ? valueMax : null,
+    paidTotal: hasPaid ? paidTotal : null,
+    worthMultiple,
+  };
+}
+
 export function groupCollectionBySeries(
   items: CollectionItem[],
 ): CollectionSeriesGroup[] {
   const groups = new Map<string, CollectionSeriesGroup>();
 
   for (const item of items) {
-    if (!item.figures) {
-      // Orphan ownership row — still surface under Unknown so it isn't lost.
-      const key = '__unknown__';
-      const existing = groups.get(key) ?? {
-        seriesId: key,
-        seriesName: 'Unknown series',
-        items: [],
-      };
-      // Can't render a card without a figure; skip card but log already warned.
-      groups.set(key, existing);
-      continue;
-    }
+    if (!item.figures) continue;
 
     const seriesId = item.figures.series?.id ?? item.figures.series_id;
     const seriesName = item.figures.series?.name ?? 'Unknown series';
@@ -210,6 +298,49 @@ export function groupCollectionBySeries(
   return Array.from(groups.values())
     .filter((g) => g.items.length > 0)
     .sort((a, b) => a.seriesName.localeCompare(b.seriesName));
+}
+
+export async function fetchSeriesCompletion(): Promise<SeriesCompletion[]> {
+  const { data, error } = await supabase
+    .from('series_completion')
+    .select('series_id, series_name, total, owned')
+    .order('series_name', { ascending: true });
+
+  if (__DEV__) {
+    console.log('[fetchSeriesCompletion] raw', {
+      count: data?.length ?? 0,
+      data,
+      error,
+    });
+  }
+
+  if (error) throw error;
+
+  return (data ?? [])
+    .filter((row) => row.series_id && row.series_name)
+    .map((row) => ({
+      series_id: row.series_id as string,
+      series_name: row.series_name as string,
+      total: Number(row.total ?? 0),
+      owned: Number(row.owned ?? 0),
+    }));
+}
+
+export async function fetchSeriesById(id: string): Promise<Series> {
+  const { data, error } = await supabase
+    .from('series')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function fetchSeriesDetailFigures(
+  seriesId: string,
+): Promise<FigureWithSeries[]> {
+  return fetchFigures({ seriesId });
 }
 
 export async function fetchUserFigure(
@@ -314,6 +445,12 @@ export function formatValueRange(
     return `${formatMoney(min)} – ${formatMoney(max)}`;
   }
   return formatMoney(min ?? max);
+}
+
+export function formatWorthMultiple(multiple: number | null): string | null {
+  if (multiple == null || !Number.isFinite(multiple)) return null;
+  const rounded = Math.round(multiple * 10) / 10;
+  return `worth ${rounded}× what you paid`;
 }
 
 export function rarityLabel(rarity: Rarity): string {

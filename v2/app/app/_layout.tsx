@@ -71,6 +71,17 @@ function RootNavigator() {
             headerTitleStyle: { color: theme.text },
           }}
         />
+        <Stack.Screen
+          name="series/[id]"
+          options={{
+            headerShown: true,
+            title: 'Series',
+            headerBackTitle: 'Back',
+            headerTintColor: theme.primary,
+            headerStyle: { backgroundColor: theme.background },
+            headerTitleStyle: { color: theme.text },
+          }}
+        />
       </Stack>
     </>
   );

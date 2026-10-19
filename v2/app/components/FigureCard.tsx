@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -11,10 +11,22 @@ import { colors, radii, spacing } from '@/theme';
 type Props = {
   figure: FigureWithSeries;
   owned?: boolean;
+  /** Missing / not owned — greyscale faded look */
+  faded?: boolean;
+  /** Spare dupes (quantity - 1) */
+  spareCount?: number;
+  buyUrl?: string | null;
   onPress: () => void;
 };
 
-export function FigureCard({ figure, owned, onPress }: Props) {
+export function FigureCard({
+  figure,
+  owned,
+  faded,
+  spareCount,
+  buyUrl,
+  onPress,
+}: Props) {
   const scheme = useColorScheme();
   const theme = colors[scheme];
 
@@ -26,7 +38,7 @@ export function FigureCard({ figure, owned, onPress }: Props) {
         {
           backgroundColor: theme.surface,
           borderColor: theme.border,
-          opacity: pressed ? 0.92 : 1,
+          opacity: pressed ? 0.92 : faded ? 0.55 : 1,
           transform: [{ scale: pressed ? 0.985 : 1 }],
         },
       ]}
@@ -44,10 +56,29 @@ export function FigureCard({ figure, owned, onPress }: Props) {
             <Ionicons name="image-outline" size={28} color={theme.textMuted} />
           </View>
         )}
+        {faded ? <View style={styles.greyWash} pointerEvents="none" /> : null}
         {owned ? (
           <View style={[styles.check, { backgroundColor: theme.success }]}>
             <Ionicons name="checkmark" size={14} color="#FFFFFF" />
           </View>
+        ) : null}
+        {spareCount != null && spareCount > 0 ? (
+          <View style={[styles.spare, { backgroundColor: theme.primary }]}>
+            <ThemedText variant="caption" style={styles.spareText}>
+              +{spareCount}
+            </ThemedText>
+          </View>
+        ) : null}
+        {buyUrl ? (
+          <Pressable
+            onPress={() => {
+              void Linking.openURL(buyUrl);
+            }}
+            hitSlop={8}
+            style={[styles.buyBtn, { backgroundColor: theme.surface }]}
+          >
+            <Ionicons name="cart-outline" size={16} color={theme.primary} />
+          </Pressable>
         ) : null}
       </View>
 
@@ -82,6 +113,10 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  greyWash: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(120, 120, 120, 0.45)',
+  },
   placeholder: {
     flex: 1,
     alignItems: 'center',
@@ -93,6 +128,29 @@ const styles = StyleSheet.create({
     right: spacing.sm,
     width: 24,
     height: 24,
+    borderRadius: radii.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  spare: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: spacing.sm,
+    borderRadius: radii.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    minWidth: 28,
+    alignItems: 'center',
+  },
+  spareText: {
+    color: '#FFFFFF',
+  },
+  buyBtn: {
+    position: 'absolute',
+    bottom: spacing.sm,
+    right: spacing.sm,
+    width: 32,
+    height: 32,
     borderRadius: radii.pill,
     alignItems: 'center',
     justifyContent: 'center',
